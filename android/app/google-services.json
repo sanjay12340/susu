@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "919093364183",
+    "project_id": "susu-e8cd2",
+    "storage_bucket": "susu-e8cd2.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:919093364183:android:c351c8377f4a6c95447792",
+        "android_client_info": {
+          "package_name": "com.techgeometry.susu"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "919093364183-hsm6cmvbngls877ac8pe3t79bvsgbh93.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC2KIqRTikoTFMg-M7dYq9I4mQ9I5jwEZc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "919093364183-hsm6cmvbngls877ac8pe3t79bvsgbh93.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
