@@ -3,11 +3,16 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:susu/pages/step_count_page.dart';
+import 'package:susu/services/dashboard_service.dart';
 import 'package:susu/utils/mycontant.dart';
+import 'package:susu/utils/storage_constant.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 import 'package:charts_flutter_new/flutter.dart' as charts;
 import 'package:intl/intl.dart';
+
+import '../models/sleep_history_detail_modal.dart';
 
 class SleepCountPage extends StatefulWidget {
   const SleepCountPage({Key? key}) : super(key: key);
@@ -31,23 +36,13 @@ class _SleepCountPageState extends State<SleepCountPage> {
   String msg2 = "";
   TimeOfDay sleepTime = TimeOfDay(hour: 22, minute: 0);
   TimeOfDay wakeUpTime = TimeOfDay(hour: 6, minute: 0);
-
+  var box = GetStorage();
+  var chartData = <BarModel>[];
   List<charts.Series<BarModel, String>> createSampleModel() {
-    final data = [
-      BarModel(name: "15", value: 8),
-      BarModel(name: "16", value: 7),
-      BarModel(name: "17", value: 6),
-      BarModel(name: "18", value: 7),
-      BarModel(name: "19", value: 5),
-      BarModel(name: "20", value: 8),
-      BarModel(name: "21", value: 12),
-      BarModel(name: "22", value: 6),
-      BarModel(name: "23", value: 8),
-    ];
     return [
       charts.Series(
         id: "steps",
-        data: data,
+        data: chartData,
         domainFn: (BarModel barModel, _) => barModel.name!,
         measureFn: (BarModel barModel, _) => barModel.value,
       )
@@ -68,6 +63,35 @@ class _SleepCountPageState extends State<SleepCountPage> {
       ),
     );
     setTimeDifference();
+    fetchDetail();
+  }
+
+  void fetchDetail() {
+    DashboardService.fetchSleepTrack(
+            userId: box.read(StorageConstant.id), limit: 8)
+        .then((value) {
+      if (value != null) {
+        List<Today>? history = value.history;
+        setState(() {
+          if (history != null) {
+            DateTime now = DateTime.now();
+
+            DateFormat dateFormat = DateFormat('yyyy-MM-dd');
+            DateFormat dateFinal = DateFormat('dd');
+
+            for (var i = 1; i <= 7; i++) {
+              DateTime date = now.subtract(Duration(days: i));
+              String formatedDate = dateFormat.format(date);
+              Today? t = history.firstWhereOrNull((element) =>
+                  formatedDate == dateFormat.format(element.date!));
+              int v = t != null ? int.parse(t.duration ?? "0") : 0;
+              chartData.add(BarModel(name: dateFinal.format(date), value: v));
+            }
+            chartData = chartData.reversed.toList();
+          }
+        });
+      }
+    });
   }
 
   void _incrementPointerValue() {
@@ -218,6 +242,38 @@ class _SleepCountPageState extends State<SleepCountPage> {
               ],
             ),
           ),
+          ElevatedButton(
+              onPressed: () {
+                DateFormat dateFormat = DateFormat("yyyy-MM-dd HH:mm:ss");
+                DateTime now = DateTime.now();
+                DateTime sleepDateTime = DateTime(now.year, now.month, now.day,
+                    sleepTime.hour, sleepTime.minute);
+                DateTime wakeUpDateTime = DateTime(now.year, now.month, now.day,
+                    wakeUpTime.hour, wakeUpTime.minute);
+                print(
+                    "Before Wake ${wakeUpTime.hour}  and Sleep ${sleepTime.hour}");
+                if (wakeUpTime.hour < sleepTime.hour) {
+                  print(
+                      " in fff Before Wake ${wakeUpTime.hour}  and Sleep ${sleepTime.hour}");
+                  wakeUpDateTime = wakeUpDateTime.add(Duration(days: 1));
+                  print(
+                      " in fff Before Wake datetime ${dateFormat.format(wakeUpDateTime)} ");
+
+                  sleepDateTime = sleepDateTime.subtract(Duration(days: 1));
+                  wakeUpDateTime = wakeUpDateTime.subtract(Duration(days: 1));
+                }
+
+                Duration difference = wakeUpDateTime.difference(sleepDateTime);
+                maxSleepHours = difference.inHours.toDouble();
+                maxSleepMinutes = difference.inMinutes.remainder(60).toDouble();
+
+                DashboardService.saveSleepTrack(
+                    startTime: dateFormat.format(sleepDateTime),
+                    endTime: dateFormat.format(wakeUpDateTime),
+                    durationTime: "${difference.inHours.toInt()}",
+                    userId: box.read(StorageConstant.id));
+              },
+              child: Text("save")),
           Card(
             child: Padding(
               padding: const EdgeInsets.all(8.0),

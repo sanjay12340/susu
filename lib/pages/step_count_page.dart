@@ -2,13 +2,18 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
+import 'package:susu/models/step_history_detail_modal.dart';
 import 'package:susu/pages/step_calorie_bicycle_page.dart';
 import 'package:susu/pages/step_calorie_swimming_page.dart';
+import 'package:susu/services/dashboard_service.dart';
 import 'package:susu/utils/mycontant.dart';
+import 'package:susu/utils/storage_constant.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 import 'package:charts_flutter_new/flutter.dart' as charts;
 
 import 'step_calorie_page.dart';
+import 'package:intl/intl.dart';
 
 class StepCountPage extends StatefulWidget {
   const StepCountPage({Key? key}) : super(key: key);
@@ -22,18 +27,9 @@ class _StepCountPageState extends State<StepCountPage> {
   late Timer _timer;
   TextEditingController _walkingController = TextEditingController();
   TextEditingController _RunningController = TextEditingController();
+  var chartData = List<BarModel>.empty(growable: true);
   List<charts.Series<BarModel, String>> createSampleModel() {
-    final data = [
-      BarModel(name: "15", value: 1500),
-      BarModel(name: "16", value: 600),
-      BarModel(name: "17", value: 1800),
-      BarModel(name: "18", value: 100),
-      BarModel(name: "19", value: 2500),
-      BarModel(name: "20", value: 1200),
-      BarModel(name: "21", value: 1300),
-      BarModel(name: "22", value: 1400),
-      BarModel(name: "23", value: 1500),
-    ];
+    var data = chartData;
     return [
       charts.Series(
         id: "steps",
@@ -45,6 +41,7 @@ class _StepCountPageState extends State<StepCountPage> {
   }
 
   int todayStep = 0;
+  int todayStepFull = 0;
   int maxStep = 10000;
   double _value = 0;
   double _value1 = 20;
@@ -56,9 +53,60 @@ class _StepCountPageState extends State<StepCountPage> {
     width: 40,
     child: Image.asset("assets/images/footstep.png"),
   );
+  var box = GetStorage();
   @override
   void initState() {
     super.initState();
+    fetchDetail();
+  }
+
+  void saveStep() {
+    DashboardService.saveStepTrack(
+        step: todayStepFull, userId: box.read(StorageConstant.id));
+  }
+
+  void fetchDetail() {
+    DashboardService.fetchStepTrack(
+            userId: box.read(StorageConstant.id), limit: 8)
+        .then((value) {
+      if (value != null) {
+        Today? today = value.today;
+        List<Today>? history = value.history;
+
+        setState(() {
+          if (today != null) {
+            maxStep = int.parse(today.goal ?? "10000");
+            todayStepFull = todayStep = int.parse(today.steps ?? "0");
+            double per = (todayStep * 100) / maxStep;
+            if (per <= 100) {
+              _value = per;
+            } else {
+              _value = 100;
+            }
+            if (per <= 0) {
+              _value = 0;
+            }
+          }
+
+          if (history != null) {
+            DateTime now = DateTime.now();
+
+            DateFormat dateFormat = DateFormat('yyyy-MM-dd');
+            DateFormat dateFinal = DateFormat('dd');
+
+            for (var i = 1; i <= 7; i++) {
+              DateTime date = now.subtract(Duration(days: i));
+              String formatedDate = dateFormat.format(date);
+              Today? t = history.firstWhereOrNull((element) =>
+                  formatedDate == dateFormat.format(element.date!));
+              int v = t != null ? int.parse(t.steps ?? "0") : 0;
+              chartData.add(BarModel(name: dateFinal.format(date), value: v));
+            }
+            chartData = chartData.reversed.toList();
+          }
+        });
+      }
+    });
   }
 
   @override
@@ -98,14 +146,14 @@ class _StepCountPageState extends State<StepCountPage> {
                                   onPressed: () {
                                     setState(() {
                                       int f = todayStep - 200;
-                                      if (maxStep <= f) {
-                                        print("maxStep $f");
-                                        f = maxStep;
-                                      }
+                                      // if (maxStep <= f) {
+                                      //   print("maxStep $f");
+                                      //   f = maxStep;
+                                      // }
                                       if (f <= 0) {
                                         f = 0;
                                       }
-                                      todayStep = f;
+                                      todayStepFull = todayStep = f;
                                       double per = (todayStep * 100) / maxStep;
                                       if (per <= 100) {
                                         _value = per;
@@ -115,6 +163,8 @@ class _StepCountPageState extends State<StepCountPage> {
                                       if (per <= 0) {
                                         _value = 0;
                                       }
+
+                                      saveStep();
                                     });
                                   },
                                   icon: Icon(
@@ -125,14 +175,14 @@ class _StepCountPageState extends State<StepCountPage> {
                                   onPressed: () {
                                     setState(() {
                                       int f = todayStep + 200;
-                                      if (maxStep <= f) {
-                                        print("maxStep $f");
-                                        f = maxStep;
-                                      }
+                                      // if (maxStep <= f) {
+                                      //   print("maxStep $f");
+                                      //   f = maxStep;
+                                      // }
                                       if (f <= 0) {
                                         f = 0;
                                       }
-                                      todayStep = f;
+                                      todayStepFull = todayStep = f;
                                       double per = (todayStep * 100) / maxStep;
                                       if (per <= 100) {
                                         _value = per;
@@ -142,12 +192,13 @@ class _StepCountPageState extends State<StepCountPage> {
                                       if (per <= 0) {
                                         _value = 0;
                                       }
+                                      saveStep();
                                     });
                                   },
                                   icon: Icon(Icons.add_circle_outlined)),
                             ],
                           ),
-                          Center(child: Text("Today Step $todayStep")),
+                          Center(child: Text("Today Step $todayStepFull")),
                         ]),
                   ],
                 ),
@@ -408,5 +459,5 @@ class _StepCountPageState extends State<StepCountPage> {
 class BarModel {
   String? name;
   int? value;
-  BarModel({this.name, this.value});
+  BarModel({required this.name, required this.value});
 }

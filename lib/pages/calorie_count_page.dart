@@ -2,10 +2,15 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
+import 'package:susu/models/calorie_history_detail_modal.dart';
 import 'package:susu/pages/step_count_page.dart';
+import 'package:susu/services/dashboard_service.dart';
 import 'package:susu/utils/mycontant.dart';
+import 'package:susu/utils/storage_constant.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 import 'package:charts_flutter_new/flutter.dart' as charts;
+import 'package:intl/intl.dart' show DateFormat;
 
 class CalorieCountPage extends StatefulWidget {
   const CalorieCountPage({Key? key}) : super(key: key);
@@ -18,29 +23,20 @@ class _CalorieCountPageState extends State<CalorieCountPage> {
   double _size = 150;
 
   double _value = 0;
-  double todayCaloryConsume = 0;
-  double caloryConsumeSize = 10;
-  double maxCaloryConsume = 350;
+  int todayCaloryConsume = 0;
+  int todayCaloryConsumeFull = 0;
+  int caloryConsumeSize = 10;
+  int maxCaloryConsume = 350;
   late Widget _pauseImage;
   late Widget _downloadImage;
   bool completed = false;
-
+  var box = GetStorage();
+  var chartData = <BarModel>[];
   List<charts.Series<BarModel, String>> createSampleModel() {
-    final data = [
-      BarModel(name: "15", value: 8),
-      BarModel(name: "16", value: 7),
-      BarModel(name: "17", value: 6),
-      BarModel(name: "18", value: 7),
-      BarModel(name: "19", value: 5),
-      BarModel(name: "20", value: 8),
-      BarModel(name: "21", value: 12),
-      BarModel(name: "22", value: 6),
-      BarModel(name: "23", value: 8),
-    ];
     return [
       charts.Series(
-        id: "steps",
-        data: data,
+        id: "Calorie",
+        data: chartData,
         domainFn: (BarModel barModel, _) => barModel.name!,
         measureFn: (BarModel barModel, _) => barModel.value,
       )
@@ -60,6 +56,59 @@ class _CalorieCountPageState extends State<CalorieCountPage> {
         ),
       ),
     );
+
+    fetchDetail();
+  }
+
+  void saveCalorie() {
+    DashboardService.saveCalorieTrack(
+        cal: todayCaloryConsumeFull.toString(),
+        userId: box.read(StorageConstant.id));
+  }
+
+  void fetchDetail() {
+    DashboardService.fetchCalorieTrack(
+            userId: box.read(StorageConstant.id), limit: 8)
+        .then((value) {
+      if (value != null) {
+        Today? today = value.today;
+        List<Today>? history = value.history;
+
+        setState(() {
+          if (today != null) {
+            maxCaloryConsume = int.parse(today.goal ?? "10000");
+            todayCaloryConsumeFull =
+                todayCaloryConsume = int.parse(today.value ?? "0");
+            double per = (todayCaloryConsume * 100) / maxCaloryConsume;
+            if (per <= 100) {
+              _value = per;
+            } else {
+              _value = 100;
+            }
+            if (per <= 0) {
+              _value = 0;
+            }
+          }
+
+          if (history != null) {
+            DateTime now = DateTime.now();
+
+            DateFormat dateFormat = DateFormat('yyyy-MM-dd');
+            DateFormat dateFinal = DateFormat('dd');
+
+            for (var i = 1; i <= 7; i++) {
+              DateTime date = now.subtract(Duration(days: i));
+              String formatedDate = dateFormat.format(date);
+              Today? t = history.firstWhereOrNull((element) =>
+                  formatedDate == dateFormat.format(element.date!));
+              int v = t != null ? int.parse(t.value ?? "0") : 0;
+              chartData.add(BarModel(name: dateFinal.format(date), value: v));
+            }
+            chartData = chartData.reversed.toList();
+          }
+        });
+      }
+    });
   }
 
   void _incrementPointerValue() {
@@ -119,7 +168,7 @@ class _CalorieCountPageState extends State<CalorieCountPage> {
                   SizedBox(
                     height: 10,
                   ),
-                  Text("Today Step $todayCaloryConsume"),
+                  Text("Today Step $todayCaloryConsumeFull"),
                 ],
               ),
             ),
@@ -173,27 +222,29 @@ class _CalorieCountPageState extends State<CalorieCountPage> {
 
   void setCount({String? inc}) {
     setState(() {
-      double f = inc == "inc"
+      int f = inc == "inc"
           ? todayCaloryConsume + (caloryConsumeSize)
           : todayCaloryConsume - (caloryConsumeSize);
       if (inc == "inc") {
-        if (maxCaloryConsume <= f) {
-          print("maxStep $f");
-          f = maxCaloryConsume;
-        }
+        // if (maxCaloryConsume <= f) {
+        //   print("maxStep $f");
+        //   f = maxCaloryConsume;
+        // }
       } else {
         if (0 >= f) {
           print("maxStep $f");
           f = 0;
         }
       }
-      todayCaloryConsume = f;
+
+      todayCaloryConsumeFull = todayCaloryConsume = f;
       double per = (todayCaloryConsume * 100) / maxCaloryConsume;
       if (per < 100) {
         _value = per;
       } else {
         _value = 100;
       }
+      saveCalorie();
     });
   }
 
@@ -203,21 +254,21 @@ class _CalorieCountPageState extends State<CalorieCountPage> {
       onTap: () => {
         print("object"),
         setState(() {
-          double f = inc == "inc"
+          int f = inc == "inc"
               ? todayCaloryConsume + (caloryConsumeSize)
               : todayCaloryConsume - (caloryConsumeSize);
           if (inc == "inc") {
-            if (maxCaloryConsume <= f) {
-              print("maxStep $f");
-              f = maxCaloryConsume;
-            }
+            // if (maxCaloryConsume <= f) {
+            //   print("maxStep $f");
+            //   f = maxCaloryConsume;
+            // }
           } else {
             if (0 >= f) {
               print("maxStep $f");
               f = 0;
             }
           }
-          todayCaloryConsume = f;
+          todayCaloryConsumeFull = todayCaloryConsume = f;
           double per = (todayCaloryConsume * 100) / maxCaloryConsume;
           if (per < 100) {
             _value = per;

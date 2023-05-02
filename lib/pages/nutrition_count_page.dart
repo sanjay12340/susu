@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:im_stepper/stepper.dart';
+import 'package:susu/pages/home_page.dart';
+import 'package:susu/services/dashboard_service.dart';
 import 'package:susu/utils/mycontant.dart';
+import 'package:susu/utils/storage_constant.dart';
 
 class NutritionCountPage extends StatefulWidget {
   const NutritionCountPage({Key? key}) : super(key: key);
@@ -13,28 +17,56 @@ class NutritionCountPage extends StatefulWidget {
 class _NutritionCountPageState extends State<NutritionCountPage> {
   int dotCount = 3;
   int activeStep = 0;
-  int gestureFirstStep = 0;
-  int gestureSecondStep = 0;
+  int gestureFirstStep = 1;
+  int gestureSecondStep = 1;
   String vegMsg = "";
+  var gestureFirstStepArray = ["Weight Loss", "Muscles Gain", "Performance"];
+  var gestureSecondStepArray = ["None Vegetarian", "Vegetarian", "Eggitarian"];
+  var box = GetStorage();
   List<Map<String, dynamic>> vegActions = [
     {
       "name": "dale",
       "status": false,
     },
     {"name": "wheat", "status": false},
-    {"name": "wheat", "status": false},
-    {"name": "wheat", "status": false},
-    {"name": "wheat", "status": false},
-    {"name": "wheat", "status": false},
-    {"name": "wheat", "status": false},
-    {"name": "wheat", "status": false},
-    {"name": "wheat", "status": false},
-    {"name": "wheat", "status": false},
-    {"name": "wheat", "status": false},
-    {"name": "wheat", "status": false},
-    {"name": "wheat", "status": false},
+    {"name": "Nuts", "status": false},
+    {"name": "Lactose", "status": false},
+    {"name": "Soy", "status": false},
+    {"name": "Spinach", "status": false},
+    {"name": "Broccoli", "status": false},
+    {"name": "Kale", "status": false},
+    {"name": "Cabbage", "status": false},
+    {"name": "Carrots", "status": false},
   ];
+  List<Map<String, dynamic>> nonVegActions = [
+    {"name": "Chicken", "status": true},
+    {"name": "Beef", "status": true},
+    {"name": "Pork", "status": true},
+    {"name": "Lamb", "status": true},
+    {"name": "Fish", "status": true},
+    {"name": "Fish", "status": true},
+    {"name": "wheat", "status": false},
+    {"name": "Nuts", "status": false},
+    {"name": "Lactose", "status": false},
+    {"name": "Soy", "status": false},
+    {"name": "Spinach", "status": false},
+    {"name": "Broccoli", "status": false},
+    {"name": "Kale", "status": false},
+    {"name": "Zucchini", "status": false},
+    {"name": "Tomatoes", "status": false},
+  ];
+
   bool none = true;
+
+  List<Map<String, dynamic>> foodAllergiesList() {
+    if (gestureSecondStep == 1) {
+      return nonVegActions;
+    } else if (gestureSecondStep == 2) {
+      return vegActions;
+    } else {
+      return vegActions;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -150,7 +182,7 @@ class _NutritionCountPageState extends State<NutritionCountPage> {
                             child: Wrap(
                               crossAxisAlignment: WrapCrossAlignment.start,
                               spacing: 10,
-                              children: vegActions
+                              children: foodAllergiesList()
                                   .map((e) => ActionChip(
                                       backgroundColor: myWhite,
                                       onPressed: () {
@@ -231,19 +263,44 @@ class _NutritionCountPageState extends State<NutritionCountPage> {
                           : ElevatedButton(
                               onPressed: () {
                                 if (dotCount - 1 == activeStep) {
-                                  Get.defaultDialog(
-                                      title: "Thank you",
-                                      content: Container(
-                                        padding: EdgeInsets.symmetric(
-                                            horizontal: 20),
-                                        child: Column(
-                                          children: [
-                                            Text("We have your details.\n"),
-                                            Text(
-                                                "Our nutritional experts are on their way to help you achieve your desired transformation, by crafting a dedicated diet plan especially for you.\n\nDon't miss our mail. We'll update you soon.\n\nWith love\nTeam SUSU."),
-                                          ],
-                                        ),
-                                      ));
+                                  DashboardService.saveNutritionDiet(
+                                          bodyType: gestureFirstStepArray[
+                                              gestureFirstStep - 1],
+                                          diet: gestureSecondStepArray[
+                                              gestureSecondStep - 1],
+                                          allergy:
+                                              vegMsg.isEmpty ? "none" : vegMsg,
+                                          userId: box.read(StorageConstant.id))
+                                      .then((value) {
+                                    if (value != null) {
+                                      Map<String, dynamic> map = value;
+                                      if (map['status']) {
+                                        Get.defaultDialog(
+                                            title: "Thank you",
+                                            barrierDismissible: false,
+                                            confirmTextColor: Colors.black,
+                                            onConfirm: () {
+                                              if (Get.isDialogOpen!) {
+                                                Get.back();
+                                              }
+                                              Get.offAll(HomePage());
+                                            },
+                                            content: Container(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 20),
+                                              child: Column(
+                                                children: const [
+                                                  Text(
+                                                      "We have your details.\n"),
+                                                  Text(
+                                                      "Our nutritional experts are on their way to help you achieve your desired transformation, by crafting a dedicated diet plan especially for you.\n\nDon't miss our mail. We'll update you soon.\n\nWith love\nTeam SUSU."),
+                                                ],
+                                              ),
+                                            ));
+                                      }
+                                    }
+                                  });
                                 }
                               },
                               child: const Text("Submit"))

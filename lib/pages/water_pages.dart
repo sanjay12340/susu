@@ -1,11 +1,18 @@
 import 'package:data_table_2/data_table_2.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
+import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
+import 'package:susu/services/dashboard_service.dart';
+import 'package:susu/utils/storage_constant.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 
+import '../models/water_history_detail_modal.dart';
 import '../utils/mycontant.dart';
 import 'home_page.dart';
+import 'package:intl/intl.dart';
 
 class WaterPage extends StatefulWidget {
   const WaterPage({super.key});
@@ -16,6 +23,7 @@ class WaterPage extends StatefulWidget {
 
 class _WaterPageState extends State<WaterPage> {
   int todayGlassTaken = 0;
+  int todayGlassTakenFull = 0;
   int maxGlass = 18;
   final double _size = 100;
   double _value = 0;
@@ -25,19 +33,63 @@ class _WaterPageState extends State<WaterPage> {
     width: 40,
     child: Image.asset("assets/images/water.png"),
   );
+  var box = GetStorage();
   @override
   void initState() {
     super.initState();
-    addTemp();
+    fetchDetail();
   }
 
-  void addTemp() {
-    lastReport.add(ReportResultModal(
-        name: "13 Mar 2023", range: "8 Glass", value: "2 Glass"));
-    lastReport.add(ReportResultModal(
-        name: "12 Mar 2023", range: "8 Glass", value: "6 Glass"));
-    lastReport.add(ReportResultModal(
-        name: "11 Mar 2023", range: "8 Glass", value: "9 Glass"));
+  void fetchDetail() {
+    DashboardService.fetchWaterReport(box.read(StorageConstant.id), 8)
+        .then((value) {
+      if (value != null) {
+        List<Today>? history = value.history;
+        Today? today = value.today;
+        setState(() {
+          if (today != null) {
+            maxGlass = today.goal != null ? int.parse(today.goal!) : 13;
+            todayGlassTakenFull = todayGlassTaken =
+                today.glass != null ? int.parse(today.glass!) : 0;
+            double per = (todayGlassTaken * 100) / maxGlass;
+            if (per <= 100) {
+              _value = per;
+            } else {
+              _value = 100;
+            }
+            if (per <= 0) {
+              _value = 0;
+            }
+          }
+          if (history != null) {
+            print("Format date in history");
+            DateTime now = DateTime.now();
+
+            DateFormat dateFormat = DateFormat('yyyy-MM-dd');
+            DateFormat dateFinal = DateFormat('dd MMM yyyy');
+
+            for (int i = 1; i <= 7; i++) {
+              DateTime date = now.subtract(Duration(days: i));
+              String formattedDate = dateFormat.format(date);
+              Today? t = history.firstWhereOrNull((element) =>
+                  dateFormat.format(element.date!) == formattedDate);
+              String? glass = t?.glass;
+
+              lastReport.add(ReportResultModal(
+                  name: dateFinal.format(date),
+                  range: t?.goal.toString() ?? maxGlass.toString(),
+                  value: "${glass ?? 0} Glass"));
+              if (kDebugMode) {
+                print("today ::: ${t?.toJson()}");
+                print("Format date $formattedDate");
+              }
+            }
+          }
+        });
+      } else {
+        print("else History:::: $value");
+      }
+    });
   }
 
   @override
@@ -86,7 +138,10 @@ class _WaterPageState extends State<WaterPage> {
                                 if (f <= 0) {
                                   f = 0;
                                 }
-                                todayGlassTaken = f;
+                                todayGlassTakenFull = todayGlassTaken = f;
+                                DashboardService.saveWaterIntake(
+                                    glass: f,
+                                    userId: box.read(StorageConstant.id));
                                 double per = (todayGlassTaken * 100) / maxGlass;
                                 if (per <= 100) {
                                   _value = per;
@@ -104,10 +159,14 @@ class _WaterPageState extends State<WaterPage> {
                             onPressed: () {
                               setState(() {
                                 int f = todayGlassTaken + 1;
-                                if (maxGlass <= f) {
-                                  print("maxStep $f");
-                                  f = maxGlass;
-                                }
+                                todayGlassTakenFull = f;
+                                DashboardService.saveWaterIntake(
+                                    glass: f,
+                                    userId: box.read(StorageConstant.id));
+                                // if (maxGlass <= f) {
+                                //   print("maxStep $f");
+                                //   f = maxGlass;
+                                // }
                                 if (f <= 0) {
                                   f = 0;
                                 }
@@ -149,7 +208,7 @@ class _WaterPageState extends State<WaterPage> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          "Taken ${todayGlassTaken} Glass",
+                          "Today Goal ${maxGlass}, Taken ${todayGlassTakenFull}  Glass",
                           style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,

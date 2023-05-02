@@ -97,18 +97,7 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  void addTemp() {
-    lastReport.add(
-        ReportResultModal(name: "Glucose", range: "14-15 Mg/dl", value: "11"));
-    lastReport.add(
-        ReportResultModal(name: "Keton", range: "9-10 Mg/dl", value: "12"));
-    lastReport.add(ReportResultModal(
-        name: "Bilirubin", range: "1.3 -1.8 Mg", value: "2.0"));
-    lastReport
-        .add(ReportResultModal(name: "pH level", range: "7-8", value: "6"));
-    lastReport.add(ReportResultModal(
-        name: "Spacific Gravity", range: "1.005-1.030", value: "2"));
-  }
+ 
 
   TableCell tableCell(name, [bool? center, bool bold = false]) => TableCell(
       child: Padding(
@@ -732,6 +721,9 @@ class _HomePageState extends State<HomePage> {
       ],
     );
   }
+
+
+
 }
 
 class MyChip extends StatelessWidget {
