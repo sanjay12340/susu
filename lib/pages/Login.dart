@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:susu/lab_pages/lab_home_page.dart';
 import 'package:susu/pages/home_page.dart';
 
 import 'package:susu/pages/sign_up_final.dart';
@@ -71,6 +72,11 @@ class _LoginPageState extends State<LoginPage> {
             mainAxisSize: MainAxisSize.max,
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
+              Card(
+                  child: Image.asset(
+                "assets/images/logo.png",
+                width: 100,
+              )),
               Container(
                 alignment: Alignment.bottomCenter,
                 decoration: BoxDecoration(
@@ -187,6 +193,7 @@ class _LoginPageState extends State<LoginPage> {
                                                   user['dob']);
                                               box.write(StorageConstant.email,
                                                   user['email']);
+
                                               box.write(
                                                   StorageConstant.user_type,
                                                   user['user_type']);
@@ -198,7 +205,23 @@ class _LoginPageState extends State<LoginPage> {
                                                   user['weight']);
                                               box.write(StorageConstant.point,
                                                   user['point']);
-                                              Get.offAll(HomePage());
+
+
+                                              box.write(
+                                                  StorageConstant.lastOrderDate,
+                                                  user['last_order_date']);
+                                              print(
+                                                  "Last order Date ::: ${user['last_order_date']}");
+                                              box.write(
+                                                  StorageConstant.userStatus,
+                                                  user['user_status'] == "1");
+
+                                              box.write(StorageConstant.lab,
+                                                  user['user_type'] == "lab");
+                                              if (user['user_type'] == "lab") {
+                                                Get.offAll(LabHomePage());
+                                              } else
+                                                Get.offAll(HomePage());
                                             }
                                           }
                                         });
@@ -241,25 +264,15 @@ class _LoginPageState extends State<LoginPage> {
                                       // submit form data to backend
                                     }
                                   },
-                                  child: const Text(
-                                    'Forget Password',
-                                    style: TextStyle(
-                                        fontSize: 18, color: Colors.blue),
-                                  ),
-                                ),
-                                const SizedBox(
-                                  height: 10,
-                                ),
-                                GestureDetector(
-                                  onTap: () {
-                                    if (_formKey.currentState!.validate()) {
-                                      // submit form data to backend
-                                    }
-                                  },
-                                  child: const Text(
-                                    'Skip Login',
-                                    style: TextStyle(
-                                        fontSize: 18, color: Colors.blue),
+                                  child: TextButton(
+                                    onPressed: () {
+                                      Get.to(ForgetPassword());
+                                    },
+                                    child: const Text(
+                                      'Forget Password',
+                                      style: TextStyle(
+                                          fontSize: 18, color: Colors.blue),
+                                    ),
                                   ),
                                 ),
                                 const SizedBox(

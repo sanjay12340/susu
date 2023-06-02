@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'package:susu/lab_pages/lab_home_page.dart';
 import 'package:susu/pages/Login.dart';
 import 'package:susu/pages/home_page.dart';
 import 'package:susu/utils/links.dart';
@@ -11,7 +11,6 @@ import 'package:get_storage/get_storage.dart';
 import 'services/genral_api_call.dart';
 import 'firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:device_preview/device_preview.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,12 +24,6 @@ void main() async {
   box.writeIfNull(StorageConstant.live, false);
   box.writeIfNull(ValueConstant.upi, '');
   runApp(MyApp());
-  // runApp(
-  //   DevicePreview(
-  //     enabled: !kReleaseMode,
-  //     builder: (context) => MyApp(), // Wrap your app
-  //   ),
-  // );
 }
 
 class MyApp extends StatefulWidget {
@@ -61,7 +54,10 @@ class _MyAppState extends State<MyApp> {
       home: (box.read(StorageConstant.isLoggedIn) == null ||
               !box.read(StorageConstant.isLoggedIn))
           ? LoginPage()
-          : HomePage(),
+          : (box.read(StorageConstant.lab) != null &&
+                  box.read(StorageConstant.lab))
+              ? LabHomePage()
+              : HomePage(),
     );
   }
 }

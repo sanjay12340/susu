@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'dart:math';
 
+import 'package:susu/services/dashboard_service.dart';
 import 'package:susu/services/game_result_service.dart';
 import 'package:susu/services/genral_api_call.dart';
 import 'package:susu/utils/mycontant.dart';
@@ -19,14 +20,14 @@ class ForgetPassword extends StatefulWidget {
 }
 
 class _ForgetPasswordState extends State<ForgetPassword> {
-  final TextEditingController _phone = TextEditingController();
+  final TextEditingController _email = TextEditingController();
   final TextEditingController _otp = TextEditingController();
 
   final RemoteGameResultService logincheck = RemoteGameResultService();
 
   final _formKey = GlobalKey<FormState>();
   var _waiting = false.obs;
-  var _alreadyNumber = false.obs;
+
   //  var _sendAgain = false.obs;
   var _showOTPbox = false.obs;
   var _nextOTP = false.obs;
@@ -140,15 +141,7 @@ class _ForgetPasswordState extends State<ForgetPassword> {
                                 TextFormField(
                                   focusNode: _mobileNode,
                                   cursorColor: myAccentColor,
-                                  keyboardType: TextInputType.number,
-                                  onChanged: (val) {
-                                    if (val.length < 10) {
-                                      _alreadyNumber.value = false;
-                                    }
-                                  },
-                                  inputFormatters: [
-                                    FilteringTextInputFormatter.digitsOnly
-                                  ],
+                                  keyboardType: TextInputType.emailAddress,
                                   decoration: InputDecoration(
                                     focusedBorder: new OutlineInputBorder(
                                       borderSide:
@@ -165,24 +158,21 @@ class _ForgetPasswordState extends State<ForgetPassword> {
                                           new BorderRadius.circular(7),
                                       borderSide: new BorderSide(),
                                     ),
-                                    hintText: "Mobile Number",
-                                    labelText: "Moble Number",
+                                    hintText: "Email Number",
+                                    labelText: "Email Number",
                                     labelStyle: TextStyle(
                                         color: _mobileNode.hasFocus
                                             ? myPrimaryColor
                                             : Colors.grey),
                                   ),
-                                  controller: _phone,
+                                  controller: _email,
                                   validator: (val) {
-                                    if (val!.length != 10) {
-                                      return "Invalid Number";
+                                    if (val != null && val.isEmail) {
+                                      return null;
                                     }
-                                    return null;
+                                    return "Provide Valid Email";
                                   },
                                 ),
-                                Obx(() => (_alreadyNumber.value)
-                                    ? Text("Aleady Exit this number")
-                                    : Container())
                               ],
                             ),
                       SizedBox(
@@ -193,18 +183,14 @@ class _ForgetPasswordState extends State<ForgetPassword> {
                               width: size.longestSide,
                               decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(7),
-                                  gradient: LinearGradient(
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                      colors: [myPrimaryColor, myAccentColor])),
+                                  color: myPrimaryColor),
                               child: TextButton(
                                   onPressed: () {
                                     if (_formKey.currentState!.validate()) {
-                                      if (_otp.text == random.toString() &&
-                                          !_alreadyNumber.value) {
+                                      if (_otp.text == random.toString()) {
                                         Get.to(
                                           () => ForgetPasswordFinal(
-                                            phone: _phone.text,
+                                            phone: _email.text,
                                           ),
                                         );
                                       } else {
@@ -226,30 +212,21 @@ class _ForgetPasswordState extends State<ForgetPassword> {
                               width: size.longestSide,
                               decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(7),
-                                  gradient: LinearGradient(
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                      colors: [myPrimaryColor, myAccentColor])),
+                                  color: myPrimaryColor),
                               child: TextButton(
                                   onPressed: () {
                                     if (_formKey.currentState!.validate()) {
-                                      if (_phone.text.length == 10) {
-                                        GenralApiCallService()
-                                            .fetchGenralQueryWithRawData(
-                                                "select phone from user where phone='${_phone.text}'")
-                                            .then((value) {
-                                          var data = jsonDecode(value);
-                                          if (data.length > 0) {
-                                            _alreadyNumber.value = false;
-                                            random =
-                                                Random().nextInt(9999) + 1000;
+                                      _waiting.value = true;
+                                      random = Random().nextInt(9999) + 1000;
 
-                                            setOTP(_phone.text, random);
-                                          } else {
-                                            _alreadyNumber.value = true;
-                                          }
-                                        });
-                                      }
+                                      print("Send");
+                                      DashboardService.resetPassword(
+                                              _email.text, _otp.text)
+                                          .then((value) {
+                                        if (value != null && value['status']) {
+                                          _showOTPbox.value = true;
+                                        }
+                                      });
                                     }
                                   },
                                   child: (_waiting.value)
@@ -280,7 +257,7 @@ class _ForgetPasswordState extends State<ForgetPassword> {
                                           random =
                                               Random().nextInt(9999) + 1000;
 
-                                          setOTP(_phone.text, random);
+                                          setOTP(_email.text, random);
                                         },
                                         child: Text("Resend OTP",
                                             style: TextStyle(color: myWhite))),

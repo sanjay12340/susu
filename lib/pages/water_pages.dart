@@ -46,6 +46,10 @@ class _WaterPageState extends State<WaterPage> {
       if (value != null) {
         List<Today>? history = value.history;
         Today? today = value.today;
+        DateTime? lastOrderDate = today?.lastOrderDate;
+        if (kDebugMode) {
+          print("Last Order Date ${today?.lastOrderDate}");
+        }
         setState(() {
           if (today != null) {
             maxGlass = today.goal != null ? int.parse(today.goal!) : 13;
@@ -61,7 +65,7 @@ class _WaterPageState extends State<WaterPage> {
               _value = 0;
             }
           }
-          if (history != null) {
+          if (history != null && lastOrderDate != null) {
             print("Format date in history");
             DateTime now = DateTime.now();
 
@@ -74,11 +78,16 @@ class _WaterPageState extends State<WaterPage> {
               Today? t = history.firstWhereOrNull((element) =>
                   dateFormat.format(element.date!) == formattedDate);
               String? glass = t?.glass;
+              var lastOrderDays = lastOrderDate.difference(date).isNegative;
+              print(
+                  "date Compare current date ${dateFormat.format(date)}  last date  ${dateFormat.format(lastOrderDate)} diffrance ${lastOrderDays} ");
+              if (lastOrderDays) {
+                lastReport.add(ReportResultModal(
+                    name: dateFinal.format(date),
+                    range: t?.goal.toString() ?? maxGlass.toString(),
+                    value: "${glass ?? 0} Glass"));
+              }
 
-              lastReport.add(ReportResultModal(
-                  name: dateFinal.format(date),
-                  range: t?.goal.toString() ?? maxGlass.toString(),
-                  value: "${glass ?? 0} Glass"));
               if (kDebugMode) {
                 print("today ::: ${t?.toJson()}");
                 print("Format date $formattedDate");
@@ -127,33 +136,6 @@ class _WaterPageState extends State<WaterPage> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        IconButton(
-                            onPressed: () {
-                              setState(() {
-                                int f = todayGlassTaken - 1;
-                                if (maxGlass <= f) {
-                                  print("maxStep $f");
-                                  f = maxGlass;
-                                }
-                                if (f <= 0) {
-                                  f = 0;
-                                }
-                                todayGlassTakenFull = todayGlassTaken = f;
-                                DashboardService.saveWaterIntake(
-                                    glass: f,
-                                    userId: box.read(StorageConstant.id));
-                                double per = (todayGlassTaken * 100) / maxGlass;
-                                if (per <= 100) {
-                                  _value = per;
-                                } else {
-                                  _value = 100;
-                                }
-                                if (per <= 0) {
-                                  _value = 0;
-                                }
-                              });
-                            },
-                            icon: Icon(Icons.remove_circle_outlined)),
                         _getFourthProgressBar(),
                         IconButton(
                             onPressed: () {
@@ -161,7 +143,7 @@ class _WaterPageState extends State<WaterPage> {
                                 int f = todayGlassTaken + 1;
                                 todayGlassTakenFull = f;
                                 DashboardService.saveWaterIntake(
-                                    glass: f,
+                                    glass: 1,
                                     userId: box.read(StorageConstant.id));
                                 // if (maxGlass <= f) {
                                 //   print("maxStep $f");

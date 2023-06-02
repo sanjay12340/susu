@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:susu/utils/mycontant.dart';
 import 'package:youtube_player_iframe/youtube_player_iframe.dart';
 import 'package:get/get.dart';
 
+import '../mywidgets/step_card.dart';
+
 class StepCalorieBicyclePage extends StatefulWidget {
   final String? name;
+  final String? image;
 
-  const StepCalorieBicyclePage({Key? key, this.name}) : super(key: key);
+  const StepCalorieBicyclePage({Key? key, this.name, this.image})
+      : super(key: key);
 
   @override
   _StepCalorieBicyclePageState createState() => _StepCalorieBicyclePageState();
@@ -20,13 +25,18 @@ class _StepCalorieBicyclePageState extends State<StepCalorieBicyclePage> {
   var timeController = TextEditingController();
   var distanceController = TextEditingController();
   var caloryController = TextEditingController();
+  var box = GetStorage();
+  var speed = {"Slow": "17", "Moderate": "23", "Fast": "32.2"};
+  var speedMeet = {"Slow": "6.8", "Moderate": "10", "Fast": "15.8"};
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
 
-  var items = [
-    'Slow',
-    'Moderate',
-    'Fast',
-    'Custom',
-  ];
+    setState(() {
+      speedController.text = speed[walkingType] ?? '';
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,12 +46,7 @@ class _StepCalorieBicyclePageState extends State<StepCalorieBicyclePage> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            Card(
-              child: YoutubePlayer(
-                controller: _controller,
-                aspectRatio: 16 / 9,
-              ),
-            ),
+            StepCard(image: widget.image!),
             heightGapMedium2,
             SizedBox(
               width: double.infinity,
@@ -118,14 +123,6 @@ class _StepCalorieBicyclePageState extends State<StepCalorieBicyclePage> {
               ),
             ),
           ],
-        ),
-      ),
-      bottomSheet: Container(
-        width: Get.width,
-        padding: EdgeInsets.symmetric(horizontal: 20),
-        child: ElevatedButton(
-          child: const Text("Save"),
-          onPressed: () {},
         ),
       ),
     );

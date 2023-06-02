@@ -76,7 +76,7 @@ class ContactInfoPagePassword extends StatelessWidget {
                         if (_formState.currentState!.validate()) {
                           btn.value = "Please Wait.....";
                           String sql =
-                              "UPDATE `user` SET `password` = '${_newPassword.text.toString()}'  WHERE user_id ='${box.read('id')}' ";
+                              "UPDATE `users` SET `password` = '${_newPassword.text.toString()}'  WHERE id ='${box.read('id')}' ";
                           g
                               .fetchGenralQueryNormal(
                                   sql, "Update success", "Update failure")

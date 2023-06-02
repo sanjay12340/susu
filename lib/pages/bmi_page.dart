@@ -4,8 +4,10 @@ import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:susu/utils/mycontant.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 
+import '../utils/bim.dart';
 import '../utils/storage_constant.dart';
 
 class BMIPage extends StatefulWidget {
@@ -21,7 +23,22 @@ class _BMIPageState extends State<BMIPage> {
   String? status;
   final _formKey = GlobalKey<FormState>();
   double value = 0;
+  bool info = false;
   var box = GetStorage();
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+    setState(() {
+      _weightController.text = box.read(StorageConstant.weight);
+      _heightController.text = box.read(StorageConstant.height);
+      value = BMI.getBmi(
+          height: int.parse(box.read(StorageConstant.height)),
+          weight: int.parse(box.read(StorageConstant.weight)));
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -136,37 +153,60 @@ class _BMIPageState extends State<BMIPage> {
               range: "30.0-Above",
               circleColor: Colors.brown,
             ),
+            gapHeightL2,
+            gapHeightL2,
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        "What does your BMI means?",
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                      IconButton(
+                          onPressed: () {
+                            setState(() {
+                              info = !info;
+                            });
+                          },
+                          icon: Icon(Icons.info)),
+                    ],
+                  ),
+                  gapHeightM2,
+                  if (info)
+                    Text(
+                        """Although BMI can be used for most men and women, it does have some limits:
+            
+1. It may overestimate body fat in athletes and others who have a muscular build.
+            
+2. It may underestimate body fat in older persons and others who have lost muscle.
+            
+For people who are considered obese (BMI greater than or equal to 30) or those who are overweight (BMI of 25 to 29.9) and have two or more risk factors, it is recommended that you lose weight. Even a small weight loss (between 5 and 10 percent of your current weight) will help lower your risk of developing diseases associated with obesity. People who are overweight, do not have a high waist measurement, and have fewer than two risk factors may need to prevent further weight gain rather than lose weight.
+            
+Talk to your doctor/nutritional expert to see whether you are at an increased risk and whether you should lose weight. 
+            
+Your doctor will evaluate your BMI, waist measurement, and other risk factors for heart disease, if any prevail.
+            
+The good news is even a small weight loss (between 5 and 10 percent of your current weight) will help lower your risk of developing those diseases.
+            
+You can also SuSu advanced nutritional experts for a complete diet solution.""")
+                ],
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    getBmi(
-        height: int.parse(StorageConstant.height),
-        weight: int.parse(StorageConstant.weight));
-  }
-
   void getBmi({required int height, required int weight}) {
-    int h = height;
-    int w = weight;
-    double v = w / ((h / 100) * (h / 100));
-    print("BMI:: $w $h $v");
-
-    if (v < 18.5) {
-      value = 22.5;
-    } else if (v >= 18.5 && v < 24.9) {
-      value = 45;
-    } else if (v >= 24.9 && v < 29.9) {
-      value = 75;
-    } else {
-      value = 105;
-    }
-    setState(() {});
+    setState(() {
+      value = BMI.getBmi(height: height, weight: weight);
+    });
   }
 
   SfRadialGauge _buildRadialTextPointer() {
@@ -229,14 +269,14 @@ class _BMIPageState extends State<BMIPage> {
           maximum: 120,
           radiusFactor: 0.85,
           canScaleToFit: true,
-          pointers: const <GaugePointer>[
+          pointers: <GaugePointer>[
             MarkerPointer(
                 markerType: MarkerType.text,
                 text: '',
                 value: 15,
                 textStyle: GaugeTextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 18,
+                    fontSize: 14,
                     fontFamily: 'Times'),
                 offsetUnit: GaugeSizeUnit.factor,
                 markerOffset: -0.12),
@@ -246,7 +286,7 @@ class _BMIPageState extends State<BMIPage> {
                 value: 45,
                 textStyle: GaugeTextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 18,
+                    fontSize: 14,
                     fontFamily: 'Times'),
                 offsetUnit: GaugeSizeUnit.factor,
                 markerOffset: -0.12),
@@ -256,7 +296,7 @@ class _BMIPageState extends State<BMIPage> {
                 value: 75,
                 textStyle: GaugeTextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 18,
+                    fontSize: 14,
                     fontFamily: 'Times'),
                 offsetUnit: GaugeSizeUnit.factor,
                 markerOffset: -0.12),
@@ -266,7 +306,7 @@ class _BMIPageState extends State<BMIPage> {
                 value: 105,
                 textStyle: GaugeTextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 18,
+                    fontSize: 14,
                     fontFamily: 'Times'),
                 offsetUnit: GaugeSizeUnit.factor,
                 markerOffset: -0.12)

@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:get_storage/get_storage.dart';
+import 'package:susu/mywidgets/step_card.dart';
 import 'package:susu/utils/mycontant.dart';
 import 'package:youtube_player_iframe/youtube_player_iframe.dart';
 import 'package:get/get.dart';
 
+import '../utils/storage_constant.dart';
+import '../utils/util.dart';
+
 class StepCaloriePage extends StatefulWidget {
   final String? name;
+  final String? image;
 
-  const StepCaloriePage({Key? key, this.name}) : super(key: key);
+  const StepCaloriePage({Key? key, this.name, this.image}) : super(key: key);
 
   @override
   _StepCaloriePageState createState() => _StepCaloriePageState();
@@ -16,17 +23,36 @@ class _StepCaloriePageState extends State<StepCaloriePage> {
   final _controller = YoutubePlayerController.fromVideoId(
       videoId: "fhyMaNuMVQM", params: YoutubePlayerParams());
   String walkingType = "Slow";
-  var speedController = TextEditingController(text: "3.5");
+  var speedController = TextEditingController();
   var timeController = TextEditingController();
   var distanceController = TextEditingController();
   var caloryController = TextEditingController();
-
+  var box = GetStorage();
   var items = [
     'Slow',
     'Moderate',
     'Fast',
-    'Custom',
   ];
+
+  var speed = {"Slow": "3.2", "Moderate": "4.8", "Fast": "5.6"};
+  var speedMeet = {"Slow": "2", "Moderate": "3", "Fast": "4.3"};
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+    setState(() {
+      if (widget.name == "Running") {
+        speed = {"Slow": "11.3", "Moderate": "14.5", "Fast": "19.3"};
+        speedMeet = {"Slow": "11", "Moderate": "12.8", "Fast": "19.0"};
+      }
+      if (widget.name == "Cycling") {
+        speed = {"Slow": "17", "Moderate": "23", "Fast": "32.2"};
+        speedMeet = {"Slow": "6.8", "Moderate": "10", "Fast": "15.8"};
+      }
+      speedController.text = speed[walkingType] ?? '';
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,12 +62,7 @@ class _StepCaloriePageState extends State<StepCaloriePage> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            Card(
-              child: YoutubePlayer(
-                controller: _controller,
-                aspectRatio: 16 / 9,
-              ),
-            ),
+            StepCard(image: widget.image!),
             heightGapMedium2,
             SizedBox(
               width: double.infinity,
@@ -52,7 +73,6 @@ class _StepCaloriePageState extends State<StepCaloriePage> {
                   child: Column(
                     children: [
                       DropdownButtonFormField(
-                        iconSize: 0,
                         // Initial Value
                         value: walkingType,
 
@@ -75,6 +95,19 @@ class _StepCaloriePageState extends State<StepCaloriePage> {
                         onChanged: (String? newValue) {
                           setState(() {
                             walkingType = newValue!;
+                            speedController.text = speed[walkingType] ?? '';
+                            if (timeController.text.isNotEmpty) {
+                              distanceController.text =
+                                  ((int.parse(timeController.text) / 60) *
+                                          double.parse(speed[walkingType]!))
+                                      .toStringAsFixed(2);
+
+                              caloryController.text = Util.caloriesBurn(
+                                  int.parse(timeController.text),
+                                  double.parse(speedMeet[walkingType]!),
+                                  double.parse(
+                                      box.read(StorageConstant.weight)));
+                            }
                           });
                         },
                       ),
@@ -94,6 +127,7 @@ class _StepCaloriePageState extends State<StepCaloriePage> {
                     children: [
                       Expanded(
                           child: TextFormField(
+                        readOnly: true,
                         controller: speedController,
                         enabled: false,
                         decoration: InputDecoration(
@@ -121,6 +155,22 @@ class _StepCaloriePageState extends State<StepCaloriePage> {
                       Expanded(
                           child: TextFormField(
                         controller: timeController,
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly
+                        ],
+                        onChanged: (value) {
+                          if (value != null && value.isNotEmpty) {
+                            distanceController.text = ((int.parse(value) / 60) *
+                                    double.parse(speed[walkingType]!))
+                                .toStringAsFixed(2);
+                            ;
+                            caloryController.text = Util.caloriesBurn(
+                                int.parse(timeController.text),
+                                double.parse(speedMeet[walkingType]!),
+                                double.parse(box.read(StorageConstant.weight)));
+                          }
+                        },
                         decoration: InputDecoration(
                             border: UnderlineInputBorder(
                                 borderSide: BorderSide.none),
@@ -145,6 +195,7 @@ class _StepCaloriePageState extends State<StepCaloriePage> {
                     children: [
                       Expanded(
                           child: TextFormField(
+                        readOnly: true,
                         controller: distanceController,
                         decoration: InputDecoration(
                             border: UnderlineInputBorder(
@@ -170,6 +221,7 @@ class _StepCaloriePageState extends State<StepCaloriePage> {
                     children: [
                       Expanded(
                           child: TextFormField(
+                        readOnly: true,
                         controller: caloryController,
                         decoration: InputDecoration(
                             border: UnderlineInputBorder(
@@ -185,14 +237,6 @@ class _StepCaloriePageState extends State<StepCaloriePage> {
               ),
             ),
           ],
-        ),
-      ),
-      bottomSheet: Container(
-        width: Get.width,
-        padding: EdgeInsets.symmetric(horizontal: 20),
-        child: ElevatedButton(
-          child: const Text("Save"),
-          onPressed: () {},
         ),
       ),
     );

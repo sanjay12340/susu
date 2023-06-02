@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -29,6 +30,7 @@ class _SleepCountPageState extends State<SleepCountPage> {
   double sleepSize = 0.5;
   double maxSleepHours = 8;
   double maxSleepMinutes = 30;
+  String todayTask = "Pending";
   late Widget _pauseImage;
   late Widget _downloadImage;
   bool completed = false;
@@ -78,12 +80,24 @@ class _SleepCountPageState extends State<SleepCountPage> {
 
             DateFormat dateFormat = DateFormat('yyyy-MM-dd');
             DateFormat dateFinal = DateFormat('dd');
+            String today = dateFormat.format(now);
 
             for (var i = 1; i <= 7; i++) {
               DateTime date = now.subtract(Duration(days: i));
+
               String formatedDate = dateFormat.format(date);
               Today? t = history.firstWhereOrNull((element) =>
                   formatedDate == dateFormat.format(element.date!));
+
+              if (i == 1) {
+                print("first date ${formatedDate}");
+
+                if (t != null) {
+                  print("first date inside ${t.date}");
+                  todayTask = "Done";
+                }
+              }
+
               int v = t != null ? int.parse(t.duration ?? "0") : 0;
               chartData.add(BarModel(name: dateFinal.format(date), value: v));
             }
@@ -242,38 +256,52 @@ class _SleepCountPageState extends State<SleepCountPage> {
               ],
             ),
           ),
-          ElevatedButton(
-              onPressed: () {
-                DateFormat dateFormat = DateFormat("yyyy-MM-dd HH:mm:ss");
-                DateTime now = DateTime.now();
-                DateTime sleepDateTime = DateTime(now.year, now.month, now.day,
-                    sleepTime.hour, sleepTime.minute);
-                DateTime wakeUpDateTime = DateTime(now.year, now.month, now.day,
-                    wakeUpTime.hour, wakeUpTime.minute);
-                print(
-                    "Before Wake ${wakeUpTime.hour}  and Sleep ${sleepTime.hour}");
-                if (wakeUpTime.hour < sleepTime.hour) {
-                  print(
-                      " in fff Before Wake ${wakeUpTime.hour}  and Sleep ${sleepTime.hour}");
-                  wakeUpDateTime = wakeUpDateTime.add(Duration(days: 1));
-                  print(
-                      " in fff Before Wake datetime ${dateFormat.format(wakeUpDateTime)} ");
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              TextButton(onPressed: () {}, child: Text(todayTask)),
+              ElevatedButton(
+                  onPressed: () {
+                    DateFormat dateFormat = DateFormat("yyyy-MM-dd HH:mm:ss");
+                    DateTime now = DateTime.now();
+                    DateTime sleepDateTime = DateTime(now.year, now.month,
+                        now.day, sleepTime.hour, sleepTime.minute);
+                    DateTime wakeUpDateTime = DateTime(now.year, now.month,
+                        now.day, wakeUpTime.hour, wakeUpTime.minute);
+                    print(
+                        "Before Wake ${wakeUpTime.hour}  and Sleep ${sleepTime.hour}");
+                    if (wakeUpTime.hour < sleepTime.hour) {
+                      print(
+                          " in fff Before Wake ${wakeUpTime.hour}  and Sleep ${sleepTime.hour}");
+                      wakeUpDateTime = wakeUpDateTime.add(Duration(days: 1));
+                      print(
+                          " in fff Before Wake datetime ${dateFormat.format(wakeUpDateTime)} ");
 
-                  sleepDateTime = sleepDateTime.subtract(Duration(days: 1));
-                  wakeUpDateTime = wakeUpDateTime.subtract(Duration(days: 1));
-                }
+                      sleepDateTime = sleepDateTime.subtract(Duration(days: 1));
+                      wakeUpDateTime =
+                          wakeUpDateTime.subtract(Duration(days: 1));
+                    }
 
-                Duration difference = wakeUpDateTime.difference(sleepDateTime);
-                maxSleepHours = difference.inHours.toDouble();
-                maxSleepMinutes = difference.inMinutes.remainder(60).toDouble();
+                    Duration difference =
+                        wakeUpDateTime.difference(sleepDateTime);
+                    maxSleepHours = difference.inHours.toDouble();
+                    maxSleepMinutes =
+                        difference.inMinutes.remainder(60).toDouble();
 
-                DashboardService.saveSleepTrack(
-                    startTime: dateFormat.format(sleepDateTime),
-                    endTime: dateFormat.format(wakeUpDateTime),
-                    durationTime: "${difference.inHours.toInt()}",
-                    userId: box.read(StorageConstant.id));
-              },
-              child: Text("save")),
+                    DashboardService.saveSleepTrack(
+                            startTime: dateFormat.format(sleepDateTime),
+                            endTime: dateFormat.format(wakeUpDateTime),
+                            durationTime: "${difference.inHours.toInt()}",
+                            userId: box.read(StorageConstant.id))
+                        .then((value) {
+                      setState(() {
+                        todayTask = "Done";
+                      });
+                    });
+                  },
+                  child: Text("save")),
+            ],
+          ),
           Card(
             child: Padding(
               padding: const EdgeInsets.all(8.0),

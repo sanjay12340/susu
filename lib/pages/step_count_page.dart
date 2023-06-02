@@ -113,13 +113,13 @@ class _StepCountPageState extends State<StepCountPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Step Count'),
+        title: const Text('Calorie Exercise Calculator'),
       ),
       backgroundColor: Color(0xFFF5F5F5),
       body: SingleChildScrollView(
         child: Column(
           children: [
-            SizedBox(
+            const SizedBox(
               height: 10,
             ),
             Card(
@@ -133,11 +133,11 @@ class _StepCountPageState extends State<StepCountPage> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
                           Text(
-                            "Today Goal $maxStep",
-                            style: TextStyle(
+                            "Recommended Goal $maxStep",
+                            style: const TextStyle(
                                 fontSize: 20, fontWeight: FontWeight.bold),
                           ),
-                          SizedBox(
+                          const SizedBox(
                             height: 10,
                           ),
                           Row(
@@ -167,7 +167,7 @@ class _StepCountPageState extends State<StepCountPage> {
                                       saveStep();
                                     });
                                   },
-                                  icon: Icon(
+                                  icon: const Icon(
                                     Icons.remove_circle_outlined,
                                   )),
                               _getFourthProgressBar(),
@@ -195,7 +195,7 @@ class _StepCountPageState extends State<StepCountPage> {
                                       saveStep();
                                     });
                                   },
-                                  icon: Icon(Icons.add_circle_outlined)),
+                                  icon: const Icon(Icons.add_circle_outlined)),
                             ],
                           ),
                           Center(child: Text("Today Step $todayStepFull")),
@@ -204,7 +204,18 @@ class _StepCountPageState extends State<StepCountPage> {
                 ),
               ),
             ),
-            SizedBox(
+            const SizedBox(
+              height: 10,
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Center(
+                  child: Text(
+                "Calorie Burned Calculator - Activity Based",
+                style: TextStyle(fontWeight: FontWeight.bold),
+              )),
+            ),
+            const SizedBox(
               height: 10,
             ),
             Card(
@@ -218,7 +229,7 @@ class _StepCountPageState extends State<StepCountPage> {
                       child: Column(
                         children: [
                           Row(
-                            children: [
+                            children: const [
                               Text(
                                 "Walking",
                                 style: TextStyle(fontWeight: FontWeight.bold),
@@ -230,7 +241,10 @@ class _StepCountPageState extends State<StepCountPage> {
                     ),
                     IconButton(
                         onPressed: () {
-                          Get.to(StepCaloriePage(name: "Walking"));
+                          Get.to(const StepCaloriePage(
+                            name: "Walking",
+                            image: "walking.png",
+                          ));
                         },
                         icon: Icon(
                           Icons.add_circle_outline,
@@ -240,7 +254,7 @@ class _StepCountPageState extends State<StepCountPage> {
                 ),
               ),
             ),
-            SizedBox(
+            const SizedBox(
               height: 10,
             ),
             Card(
@@ -254,7 +268,7 @@ class _StepCountPageState extends State<StepCountPage> {
                       child: Column(
                         children: [
                           Row(
-                            children: [
+                            children: const [
                               Text(
                                 "Running",
                                 style: TextStyle(fontWeight: FontWeight.bold),
@@ -266,7 +280,10 @@ class _StepCountPageState extends State<StepCountPage> {
                     ),
                     IconButton(
                         onPressed: () {
-                          Get.to(StepCaloriePage(name: "Running"));
+                          Get.to(const StepCaloriePage(
+                            name: "Running",
+                            image: "running.png",
+                          ));
                         },
                         icon: Icon(
                           Icons.add_circle_outline,
@@ -276,7 +293,7 @@ class _StepCountPageState extends State<StepCountPage> {
                 ),
               ),
             ),
-            SizedBox(
+            const SizedBox(
               height: 10,
             ),
             Card(
@@ -290,7 +307,7 @@ class _StepCountPageState extends State<StepCountPage> {
                       child: Column(
                         children: [
                           Row(
-                            children: [
+                            children: const [
                               Text(
                                 "Cycling",
                                 style: TextStyle(fontWeight: FontWeight.bold),
@@ -302,7 +319,10 @@ class _StepCountPageState extends State<StepCountPage> {
                     ),
                     IconButton(
                         onPressed: () {
-                          Get.to(StepCalorieBicyclePage(name: "Cycling"));
+                          Get.to(const StepCaloriePage(
+                            name: "Cycling",
+                            image: "bicycling.gif",
+                          ));
                         },
                         icon: Icon(
                           Icons.add_circle_outline,
@@ -312,7 +332,7 @@ class _StepCountPageState extends State<StepCountPage> {
                 ),
               ),
             ),
-            SizedBox(
+            const SizedBox(
               height: 10,
             ),
             Card(
@@ -326,7 +346,7 @@ class _StepCountPageState extends State<StepCountPage> {
                       child: Column(
                         children: [
                           Row(
-                            children: [
+                            children: const [
                               Text(
                                 "Swimming",
                                 style: TextStyle(fontWeight: FontWeight.bold),
@@ -338,7 +358,10 @@ class _StepCountPageState extends State<StepCountPage> {
                     ),
                     IconButton(
                         onPressed: () {
-                          Get.to(StepCalorieSwimmingPage(name: "Swimming"));
+                          Get.to(const StepCalorieSwimmingPage(
+                            name: "Swimming",
+                            image: 'Swimming.png',
+                          ));
                         },
                         icon: Icon(
                           Icons.add_circle_outline,

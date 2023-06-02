@@ -507,12 +507,16 @@ class _SignUPFinalPageState extends State<SignUPFinalPage> {
                                               user['user_type']);
                                           box.write(StorageConstant.user_type,
                                               user['user_type']);
+                                          box.write(StorageConstant.gender,
+                                              user['sex']);
                                           box.write(StorageConstant.height,
                                               user['height']);
                                           box.write(StorageConstant.weight,
                                               user['weight']);
                                           box.write(StorageConstant.point,
                                               user['point']);
+                                          box.write(StorageConstant.userStatus,
+                                              user['user_status'] == "1");
                                           Get.defaultDialog(
                                             title: "Alert",
                                             content: Text("Account Created"),

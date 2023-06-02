@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:susu/models/calorie_history_detail_modal.dart';
@@ -12,6 +13,10 @@ import 'package:syncfusion_flutter_gauges/gauges.dart';
 import 'package:charts_flutter_new/flutter.dart' as charts;
 import 'package:intl/intl.dart' show DateFormat;
 
+import '../utils/util.dart';
+
+enum Gender { male, female }
+
 class CalorieCountPage extends StatefulWidget {
   const CalorieCountPage({Key? key}) : super(key: key);
 
@@ -21,7 +26,7 @@ class CalorieCountPage extends StatefulWidget {
 
 class _CalorieCountPageState extends State<CalorieCountPage> {
   double _size = 150;
-
+  Gender _gender = Gender.male;
   double _value = 0;
   int todayCaloryConsume = 0;
   int todayCaloryConsumeFull = 0;
@@ -30,8 +35,12 @@ class _CalorieCountPageState extends State<CalorieCountPage> {
   late Widget _pauseImage;
   late Widget _downloadImage;
   bool completed = false;
+  double bmr = 0;
   var box = GetStorage();
   var chartData = <BarModel>[];
+  final _weightController = TextEditingController();
+  final _heightController = TextEditingController();
+  final _ageController = TextEditingController();
   List<charts.Series<BarModel, String>> createSampleModel() {
     return [
       charts.Series(
@@ -56,196 +65,352 @@ class _CalorieCountPageState extends State<CalorieCountPage> {
         ),
       ),
     );
-
-    fetchDetail();
-  }
-
-  void saveCalorie() {
-    DashboardService.saveCalorieTrack(
-        cal: todayCaloryConsumeFull.toString(),
-        userId: box.read(StorageConstant.id));
-  }
-
-  void fetchDetail() {
-    DashboardService.fetchCalorieTrack(
-            userId: box.read(StorageConstant.id), limit: 8)
-        .then((value) {
-      if (value != null) {
-        Today? today = value.today;
-        List<Today>? history = value.history;
-
-        setState(() {
-          if (today != null) {
-            maxCaloryConsume = int.parse(today.goal ?? "10000");
-            todayCaloryConsumeFull =
-                todayCaloryConsume = int.parse(today.value ?? "0");
-            double per = (todayCaloryConsume * 100) / maxCaloryConsume;
-            if (per <= 100) {
-              _value = per;
-            } else {
-              _value = 100;
-            }
-            if (per <= 0) {
-              _value = 0;
-            }
-          }
-
-          if (history != null) {
-            DateTime now = DateTime.now();
-
-            DateFormat dateFormat = DateFormat('yyyy-MM-dd');
-            DateFormat dateFinal = DateFormat('dd');
-
-            for (var i = 1; i <= 7; i++) {
-              DateTime date = now.subtract(Duration(days: i));
-              String formatedDate = dateFormat.format(date);
-              Today? t = history.firstWhereOrNull((element) =>
-                  formatedDate == dateFormat.format(element.date!));
-              int v = t != null ? int.parse(t.value ?? "0") : 0;
-              chartData.add(BarModel(name: dateFinal.format(date), value: v));
-            }
-            chartData = chartData.reversed.toList();
-          }
-        });
-      }
-    });
-  }
-
-  void _incrementPointerValue() {
+    _heightController.text = box.read(StorageConstant.height);
+    _weightController.text = box.read(StorageConstant.weight);
+    _ageController.text = Util.calculateAge(
+            DateFormat("yyyy-MM-dd").parse(box.read(StorageConstant.dob)))
+        .toStringAsFixed(0);
     setState(() {
-      if (_value == 100) {
-        _downloadImage = Container(
-            height: 100,
-            width: 100,
-            decoration: const BoxDecoration(
-                image: DecorationImage(
-              image: ExactAssetImage('assets/images/calories.png'),
-              fit: BoxFit.fill,
-            )));
-        Future<dynamic>.delayed(const Duration(milliseconds: 500));
-        completed = true;
-      } else {
-        _value++;
-      }
+      _gender = box.read(StorageConstant.gender) == "male"
+          ? Gender.male
+          : Gender.female;
+      bmr = Util.getBMR(
+          age: Util.calculateAge(
+              DateFormat("yyyy-MM-dd").parse(box.read(StorageConstant.dob))),
+          height: int.parse(box.read(StorageConstant.height)),
+          gender: box.read(StorageConstant.gender) == "male"
+              ? Gender.male
+              : Gender.female,
+          weight: int.parse(box.read(StorageConstant.weight)));
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    var textStyle = const TextStyle(fontSize: 16, color: Colors.black54);
+    const edgeInsets = const EdgeInsets.symmetric(horizontal: 20, vertical: 10);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Calories'),
+        title: const Text('Calorie Intake Calculator'),
+        titleSpacing: 0,
       ),
-      backgroundColor: Color(0xFFf5f5f5),
+      backgroundColor: const Color(0xFFf5f5f5),
       body: SingleChildScrollView(
         child: Column(children: [
-          Card(
-            elevation: 0,
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                children: [
-                  Text(
-                    "Goal $maxCaloryConsume Calories",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Card(
+              child: Column(children: [
+                Padding(
+                  padding: edgeInsets,
+                  child: Row(
                     children: [
-                      IconButton(
-                          onPressed: () {
-                            setCount(inc: "dec");
-                          },
-                          icon: Icon(Icons.remove_circle)),
-                      _getThirdProgressBar(),
-                      IconButton(
-                          onPressed: () {
-                            setCount(inc: "inc");
-                          },
-                          icon: Icon(Icons.add_circle)),
+                      SizedBox(
+                        width: 80,
+                        child: Text(
+                          "Age",
+                          style: textStyle,
+                        ),
+                      ),
+                      Expanded(
+                          child: TextFormField(
+                        controller: _ageController,
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly
+                        ],
+                        decoration: const InputDecoration(
+                            isDense: true,
+                            contentPadding: EdgeInsets.symmetric(
+                                vertical: 10, horizontal: 10),
+                            border: OutlineInputBorder()),
+                      )),
+                      gapWidthM2,
+                      Text(
+                        "ages 15-80",
+                        style: textStyle,
+                      ),
                     ],
                   ),
-                  SizedBox(
-                    height: 10,
+                ),
+                Padding(
+                  padding: edgeInsets,
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: 80,
+                        child: Text(
+                          "Gender",
+                          style: textStyle,
+                        ),
+                      ),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Row(
+                            children: <Widget>[
+                              Radio(
+                                value: Gender.male,
+                                groupValue: _gender,
+                                onChanged: (value) {
+                                  setState(() {
+                                    _gender = value!;
+                                  });
+                                },
+                              ),
+                              const Text('Male'),
+                            ],
+                          ),
+                          Row(
+                            children: <Widget>[
+                              Radio(
+                                value: Gender.female,
+                                groupValue: _gender,
+                                onChanged: (value) {
+                                  setState(() {
+                                    _gender = value!;
+                                  });
+                                },
+                              ),
+                              const Text('Female'),
+                            ],
+                          ),
+                        ],
+                      )
+                    ],
                   ),
-                  Text("Today Step $todayCaloryConsumeFull"),
-                ],
-              ),
-            ),
-          ),
-          SizedBox(
-            height: 10,
-          ),
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [Image.asset("assets/images/diet.png")],
-              ),
-            ),
-          ),
-          SizedBox(
-            height: 10,
-          ),
-          Card(
-            elevation: 0,
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Calorie Consume History",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  Container(
-                      width: Get.width - 10,
-                      height: 300,
-                      child: charts.BarChart(
-                        createSampleModel(),
-                        animate: true,
+                ),
+                Padding(
+                  padding: edgeInsets,
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: 80,
+                        child: Text(
+                          "Height",
+                          style: textStyle,
+                        ),
+                      ),
+                      Expanded(
+                          child: TextFormField(
+                        controller: _heightController,
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly
+                        ],
+                        decoration: const InputDecoration(
+                            isDense: true,
+                            contentPadding: EdgeInsets.symmetric(
+                                vertical: 10, horizontal: 10),
+                            border: OutlineInputBorder()),
                       )),
-                ],
+                      gapWidthM2,
+                      Text(
+                        "in cm",
+                        style: textStyle,
+                      ),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: edgeInsets,
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: 80,
+                        child: Text(
+                          "Weight",
+                          style: textStyle,
+                        ),
+                      ),
+                      Expanded(
+                          child: TextFormField(
+                        controller: _weightController,
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly
+                        ],
+                        decoration: const InputDecoration(
+                            isDense: true,
+                            contentPadding: EdgeInsets.symmetric(
+                                vertical: 10, horizontal: 10),
+                            border: OutlineInputBorder()),
+                      )),
+                      gapWidthM2,
+                      Text(
+                        "in Kg ",
+                        style: textStyle,
+                      ),
+                    ],
+                  ),
+                ),
+                ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        bmr = Util.getBMR(
+                            age: int.parse(_ageController.text),
+                            height: int.parse(_heightController.text),
+                            gender: _gender,
+                            weight: int.parse(_weightController.text));
+                      });
+                    },
+                    child: const Text("Calculate")),
+              ]),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Card(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "Result : ${bmr.toStringAsFixed(2)} calories per day required ",
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    )
+                  ],
+                ),
               ),
             ),
-          )
+          ),
+          Padding(
+              padding: const EdgeInsets.all(8),
+              child: Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Container(
+                    width: Get.width * 0.9,
+                    child: Column(
+                      children: [
+                        Row(
+                          children: const [
+                            Text(
+                              "Daily calorie intake based on activity level",
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            )
+                          ],
+                        ),
+                        gapHeightM2,
+                        Table(
+                          border: TableBorder.all(color: Colors.black12),
+                          defaultVerticalAlignment:
+                              TableCellVerticalAlignment.middle,
+                          columnWidths: const {
+                            0: FlexColumnWidth(5),
+                            1: FlexColumnWidth(2),
+                          },
+                          children: [
+                            TableRow(
+                                decoration: BoxDecoration(
+                                    color: myPrimaryColor.withOpacity(0.1)),
+                                children: const [
+                                  TableCell(
+                                      child: Center(
+                                    child: Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: Text(
+                                        "Activity Level",
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                    ),
+                                  )),
+                                  TableCell(
+                                      child: Center(
+                                    child: Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: Text(
+                                        "Calorie",
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                    ),
+                                  )),
+                                ]),
+                            tableRow("Sedentary: little or no exercise", 1.2),
+                            tableRow("Exercise 1-3 times/week", 1.375),
+                            tableRow("Exercise 4-5 times/week", 1.55),
+                            tableRow(
+                                "Daily exercise or intense exercise 3-4 times/week",
+                                1.6),
+                            tableRow("Intense exercise 6-7 times/week", 1.725),
+                            tableRow(
+                                "Very intense exercise daily, or physical job",
+                                1.9),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              )),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: RichText(
+                      text: const TextSpan(
+                          style: TextStyle(color: Colors.black54),
+                          children: [
+                        TextSpan(
+                            text: "Exercise : ",
+                            style: TextStyle(
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold)),
+                        TextSpan(
+                            text:
+                                "15-30 minutes of elevated heart rate activity.\n"),
+                        TextSpan(
+                            text: "Intense exercise : ",
+                            style: TextStyle(
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold)),
+                        TextSpan(
+                            text:
+                                "45-120 minutes of elevated heart rate activity.\n"),
+                        TextSpan(
+                            text: "Very intense exercise : ",
+                            style: TextStyle(
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold)),
+                        TextSpan(
+                            text: "2+ hours of elevated heart rate activity."),
+                      ])),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(
+            height: 10,
+          ),
         ]),
       ),
     );
   }
 
+  TableRow tableRow(String title, double rowValue) {
+    return TableRow(children: [
+      TableCell(
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Text(title),
+        ),
+      ),
+      TableCell(
+        child: Center(
+          child: Text((bmr * rowValue).toStringAsFixed(2)),
+        ),
+      ),
+    ]);
+  }
+
   @override
   void dispose() {
     super.dispose();
-  }
-
-  void setCount({String? inc}) {
-    setState(() {
-      int f = inc == "inc"
-          ? todayCaloryConsume + (caloryConsumeSize)
-          : todayCaloryConsume - (caloryConsumeSize);
-      if (inc == "inc") {
-        // if (maxCaloryConsume <= f) {
-        //   print("maxStep $f");
-        //   f = maxCaloryConsume;
-        // }
-      } else {
-        if (0 >= f) {
-          print("maxStep $f");
-          f = 0;
-        }
-      }
-
-      todayCaloryConsumeFull = todayCaloryConsume = f;
-      double per = (todayCaloryConsume * 100) / maxCaloryConsume;
-      if (per < 100) {
-        _value = per;
-      } else {
-        _value = 100;
-      }
-      saveCalorie();
-    });
   }
 
   GestureDetector sleepIncrement(
@@ -282,7 +447,7 @@ class _CalorieCountPageState extends State<CalorieCountPage> {
           icon,
           color: myPrimaryColor,
         ),
-        SizedBox(
+        const SizedBox(
           height: 10,
         ),
       ]),

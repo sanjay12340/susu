@@ -287,6 +287,9 @@ class _BookTestPageState extends State<BookTestPage> {
                                   .then((value) {
                                 if (value != null) {
                                   if (value['status']) {
+                                    box.write(StorageConstant.lastOrderDate,
+                                        DateFormat("dd-MM-yyyy").format(date));
+                                    setState(() {});
                                     Get.defaultDialog(
                                       title: "Congratulation",
                                       content: Column(
@@ -303,7 +306,7 @@ class _BookTestPageState extends State<BookTestPage> {
                                           SizedBox(
                                             height: 10,
                                           ),
-                                          Text("Thank you for Join us"),
+                                          Text("Thank you for joining us"),
                                         ],
                                       ),
                                       barrierDismissible: false,

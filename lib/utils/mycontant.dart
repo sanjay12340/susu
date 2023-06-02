@@ -33,6 +33,37 @@ var heightGapXLarge = SizedBox(
   height: 16,
 );
 
+var gapHeightS = SizedBox(
+  height: 4,
+);
+var gapHeightM1 = SizedBox(
+  height: 8,
+);
+var gapHeightM2 = SizedBox(
+  height: 10,
+);
+var gapHeightL1 = SizedBox(
+  height: 12,
+);
+var gapHeightL2 = SizedBox(
+  height: 16,
+);
+var gapWidthS = SizedBox(
+  width: 4,
+);
+var gapWidthM1 = SizedBox(
+  width: 8,
+);
+var gapWidthM2 = SizedBox(
+  width: 10,
+);
+var gapWidthL1 = SizedBox(
+  width: 12,
+);
+var gapWidthL2 = SizedBox(
+  width: 16,
+);
+
 // Size Gap
 const double myHeightSmall = 4;
 const double myHeightMedium = 8;

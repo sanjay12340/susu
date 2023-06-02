@@ -1,29 +1,35 @@
 import 'dart:convert';
 
-import 'package:data_table_2/data_table_2.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:badges/badges.dart' as badges;
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:intl/intl.dart';
+import 'package:month_picker_dialog/month_picker_dialog.dart';
 import 'package:susu/pages/Login.dart';
 import 'package:susu/pages/bmi_page.dart';
 import 'package:susu/pages/book_test_page.dart';
 import 'package:susu/pages/calorie_count_page.dart';
+import 'package:susu/pages/dashboard_page.dart';
+import 'package:susu/pages/info_page.dart';
 import 'package:susu/pages/nutrition_count_page.dart';
+import 'package:susu/pages/report_detail_page.dart';
 import 'package:susu/pages/sleep_count_page.dart';
 import 'package:susu/pages/step_count_page.dart';
 import 'package:susu/pages/test_history_page.dart';
 import 'package:susu/pages/water_pages.dart';
 import 'package:susu/services/dashboard_service.dart';
+import 'package:susu/utils/bim.dart';
 import 'package:susu/utils/mycontant.dart';
 import 'package:susu/utils/storage_constant.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:share_plus/share_plus.dart';
 
 import 'account_page.dart';
+import 'contact_info_change_password.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -46,6 +52,7 @@ class _HomePageState extends State<HomePage> {
   var good = Colors.green;
   var overWeight = Colors.red;
   var obesity = Colors.brown;
+  DateTime selectedDate = DateTime.now();
 
   @override
   void initState() {
@@ -67,11 +74,11 @@ class _HomePageState extends State<HomePage> {
           reportFound = "";
           reportDate = value['date'];
           reportData.add(TableRow(
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                   border: Border(
                       bottom: BorderSide(width: 1, color: Colors.black45))),
               children: [
-                tableCellHead("Description"),
+                tableCellHead("Name"),
                 tableCellHead("Range", true),
                 tableCellHead("Value", true),
               ]));
@@ -80,13 +87,20 @@ class _HomePageState extends State<HomePage> {
 
           for (var element in rd) {
             Map<String, dynamic> e = element;
-            reportData.add(
-              TableRow(children: [
-                tableCell(e['name'], false, true),
-                tableCell(e['alise'], true),
-                tableCell(e['value'], true),
-              ]),
-            );
+            if (e['name'] == "VC" ||
+                e['name'] == "NIT" ||
+                e['name'] == "GLU" ||
+                e['name'] == "SG" ||
+                e['name'] == "BIL") {
+              print("$e['name'] and alise $e['alise']");
+              reportData.add(
+                TableRow(children: [
+                  tableCell(e['name'], true, true),
+                  tableCell(e['alise'], true),
+                  tableCell(e['value'], true),
+                ]),
+              );
+            }
           }
         });
       } else {
@@ -96,8 +110,6 @@ class _HomePageState extends State<HomePage> {
       }
     });
   }
-
- 
 
   TableCell tableCell(name, [bool? center, bool bold = false]) => TableCell(
       child: Padding(
@@ -118,17 +130,12 @@ class _HomePageState extends State<HomePage> {
       TableCell(
           child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 10),
-        child: center != null && center
-            ? Center(
-                child: Text(
-                  name,
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-              )
-            : Text(
-                name,
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
+        child: Center(
+          child: Text(
+            name,
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+        ),
       ));
   void goTO(Widget goTo) {
     _key.currentState!.openEndDrawer();
@@ -138,24 +145,13 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _key,
       appBar: AppBar(
-        title: Text("Susu"),
+        title: const Text(
+          "SUSU",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         centerTitle: true,
-        actions: [
-          GestureDetector(
-            onTap: () {
-              box.erase();
-              Get.offAll(LoginPage());
-            },
-            child: Container(
-                alignment: Alignment.center,
-                padding: EdgeInsets.symmetric(horizontal: 10),
-                child: Icon(Icons.logout_outlined)),
-          ),
-          SizedBox(
-            width: 10,
-          )
-        ],
       ),
       drawer: Drawer(
         backgroundColor: myWhite,
@@ -166,12 +162,12 @@ class _HomePageState extends State<HomePage> {
               height: 120,
               child: Column(
                 children: [
-                  SizedBox(
+                  const SizedBox(
                     height: 20,
                   ),
                   Row(
                     children: [
-                      SizedBox(
+                      const SizedBox(
                         width: 20,
                       ),
                       Icon(
@@ -179,7 +175,7 @@ class _HomePageState extends State<HomePage> {
                         color: myPrimaryColorDark,
                         size: 60,
                       ),
-                      SizedBox(
+                      const SizedBox(
                         width: 10,
                       ),
                       Column(
@@ -187,20 +183,20 @@ class _HomePageState extends State<HomePage> {
                         children: [
                           Text(
                             box.read("name"),
-                            style: TextStyle(
+                            style: const TextStyle(
                                 fontSize: 18, fontWeight: FontWeight.bold),
                           ),
                           Text(
                             box.read("username"),
-                            style: TextStyle(
+                            style: const TextStyle(
                                 fontSize: 18, fontWeight: FontWeight.bold),
                           ),
-                          SizedBox(
+                          const SizedBox(
                             height: 8,
                           ),
                           Text(
-                            "Point : ${box.read(StorageConstant.point) ?? 0.toString()}",
-                            style: TextStyle(
+                            "Credit : ${box.read(StorageConstant.point) ?? 0.toString()}",
+                            style: const TextStyle(
                               fontSize: 16,
                             ),
                           ),
@@ -224,15 +220,15 @@ class _HomePageState extends State<HomePage> {
               leadingIcon: Icons.bookmark_add,
               iconColor: myPrimaryColor,
               onTap: () {
-                goTO(BookTestPage());
+                goTO(const BookTestPage());
               },
             ),
             CustomListMenuItem(
-              name: "Order History",
-              leadingIcon: Icons.history,
+              name: "Change Password",
+              leadingIcon: Icons.key,
               iconColor: myPrimaryColor,
               onTap: () {
-                goTO(AccountPage());
+                goTO(ContactInfoPagePassword());
               },
             ),
             CustomListMenuItem(
@@ -249,370 +245,701 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
+      body: SizedBox.expand(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Card(
+            elevation: 8,
+            shadowColor: myPrimaryColor,
+            child: Column(
+              children: [
+                gapHeightM2,
+                Text(
+                  box.read(StorageConstant.name),
+                  style: TextStyle(
+                      fontSize: 30,
+                      color: myPrimaryColor,
+                      fontWeight: FontWeight.bold),
+                ),
+                SizedBox(
+                    width: 50,
+                    child: Divider(
+                      color: myPrimaryColor,
+                      thickness: 2,
+                    )),
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      Text("Hi, ${box.read(StorageConstant.name)}"),
-                      Icon(Icons.location_on),
+                      circleButton(
+                        name: "Book Now",
+                        startColor: const Color(0xFF75b6b2),
+                        endColor: const Color(0xFF3f618f),
+                        onTap: () {
+                          print(
+                              "Last order ::: ${box.read(StorageConstant.lastOrderDate)}");
+                          var difference = 0;
+                          var flag = true;
+                          if (box.read(StorageConstant.lastOrderDate) != null) {
+                            var inputFormat = DateFormat('dd-MM-yyyy');
+                            var orderDate = inputFormat
+                                .parse(box.read(StorageConstant.lastOrderDate));
+
+                            final date2 = DateTime.now();
+                            difference = orderDate.difference(date2).inDays;
+                            print("Days diffance $difference");
+                            flag = false;
+                          }
+                          if (difference < -30 || flag) {
+                            Get.dialog(Dialog(
+                              clipBehavior: Clip.hardEdge,
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12)),
+                              child: Container(
+                                width: 250,
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Stack(
+                                      children: [
+                                        ClipPath(
+                                          clipper: LeftBottomClipper(),
+                                          child: Container(
+                                            height: 150,
+                                            color: myPrimaryColor,
+                                          ),
+                                        ),
+                                        Positioned(
+                                            top: 15,
+                                            right: 15,
+                                            child: Image.asset(
+                                              "assets/images/book_now.png",
+                                              width: 125,
+                                            )),
+                                      ],
+                                    ),
+                                    Text(
+                                      "Free Test",
+                                      style: TextStyle(
+                                          fontSize: 22,
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Text(
+                                        "Once you confirm your booking, a trained Phlebotomists (Sample Collector) will be assigned to visit you on your chosen time and pickup address and for collection of sample.",
+                                        textAlign: TextAlign.start,
+                                      ),
+                                    ),
+                                    gapHeightM2,
+                                    ElevatedButton(
+                                        onPressed: () {
+                                          Get.back();
+                                          Get.to(BookTestPage());
+                                        },
+                                        child: Text("Book Now")),
+                                    gapHeightM2,
+                                  ],
+                                ),
+                              ),
+                            ));
+                          } else {
+                            Get.defaultDialog(
+                                title: "Alert",
+                                middleText:
+                                    "You are already enrolled as our prestigious monthly member.\n\nUsers are allowed to book their tests once a month only.");
+                          }
+                        },
+                      ),
+                      circleButton(
+                        name: "Your Report",
+                        startColor: const Color(0xFFa0538b),
+                        endColor: const Color(0xFF634d8d),
+                        onTap: () {
+                          Get.dialog(Dialog(
+                            clipBehavior: Clip.hardEdge,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12)),
+                            child: StatefulBuilder(
+                              builder: (context, setState) {
+                                return Container(
+                                  width: 250,
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      SizedBox(
+                                        height: 150,
+                                        child: Stack(
+                                          children: [
+                                            Positioned(
+                                                top: 50,
+                                                child: Image.asset(
+                                                  "assets/images/calendar_group.png",
+                                                  fit: BoxFit.cover,
+                                                )),
+                                            ClipPath(
+                                              clipper: LeftBottomClipper(),
+                                              child: Container(
+                                                height: 150,
+                                                color: myPrimaryColor,
+                                              ),
+                                            ),
+                                            Positioned(
+                                                top: 15,
+                                                right: 15,
+                                                child: Image.asset(
+                                                  "assets/images/calendar.png",
+                                                  width: 125,
+                                                )),
+                                          ],
+                                        ),
+                                      ),
+                                      gapHeightM2,
+                                      Text("Please Select Date"),
+                                      gapHeightM2,
+                                      TextButton(
+                                        style: TextButton.styleFrom(
+                                            side: BorderSide(
+                                                width: 1,
+                                                color: Colors.black38)),
+                                        onPressed: () {
+                                          showMonthPicker(
+                                            context: context,
+                                            headerColor: myPrimaryColor,
+                                            initialDate: DateTime.now(),
+                                          ).then((date) {
+                                            if (date != null) {
+                                              setState(() {
+                                                selectedDate = date;
+                                              });
+                                            }
+                                          });
+                                        },
+                                        child: Container(
+                                          child: Text(
+                                            DateFormat("MMM yyyy")
+                                                .format(selectedDate),
+                                            style: TextStyle(fontSize: 25),
+                                          ),
+                                        ),
+                                      ),
+                                      gapHeightM2,
+                                      ElevatedButton(
+                                          onPressed: () {
+                                            DashboardService
+                                                    .fetchReportDetailFullByMonth(
+                                                        DateFormat("MM-yyyy")
+                                                            .format(
+                                                                selectedDate))
+                                                .then((value) {
+                                              if (value != null) {
+                                                Get.back();
+                                                if (value.status!) {
+                                                  if (value.orderDetail!
+                                                          .status! ==
+                                                      "completed") {
+                                                    if (value.orderDetail!
+                                                            .locked ==
+                                                        "0") {
+                                                      Get.to(ReportDetailPage(
+                                                        reportId: value
+                                                            .orderDetail!.id!,
+                                                      ));
+                                                    } else if (int.parse(
+                                                            box.read(
+                                                                StorageConstant
+                                                                    .point)) <
+                                                        30) {
+                                                      Get.to(InfoPage());
+                                                    } else {
+                                                      Get.to(ReportDetailPage(
+                                                        reportId: value
+                                                            .orderDetail!.id!,
+                                                      ));
+                                                    }
+                                                  } else if (value.orderDetail!
+                                                          .status! !=
+                                                      "completed") {
+                                                    Get.defaultDialog(
+                                                        title: "Alert",
+                                                        middleText:
+                                                            "You report is under process");
+                                                  }
+                                                } else {
+                                                  Get.defaultDialog(
+                                                      title: "Alert",
+                                                      middleText:
+                                                          "No Record Found");
+                                                }
+                                              } else {
+                                                Get.defaultDialog(
+                                                    title: "Alert",
+                                                    middleText:
+                                                        "No Record Found");
+                                              }
+                                            });
+                                          },
+                                          child: const Text("Continue")),
+                                      gapHeightM2,
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
+                          ));
+                        },
+                      ),
+                      circleButton(
+                        name: "Your Training",
+                        name2: "Program",
+                        startColor: const Color(0xFFffc49f),
+                        endColor: const Color(0xFFf679a1),
+                        onTap: () {
+                          if (box.read(StorageConstant.userStatus)) {
+                            Get.dialog(Dialog(
+                              clipBehavior: Clip.hardEdge,
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12)),
+                              child: Container(
+                                width: 250,
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    SizedBox(
+                                      height: 150,
+                                      child: Stack(
+                                        children: [
+                                          Positioned(
+                                              top: 50,
+                                              child: Text("Traning Program")),
+                                          ClipPath(
+                                            clipper: LeftBottomClipper(),
+                                            child: Container(
+                                              height: 150,
+                                              color: myPrimaryColor,
+                                            ),
+                                          ),
+                                          Positioned(
+                                              top: 15,
+                                              right: 15,
+                                              child: Card(
+                                                child: Image.asset(
+                                                  "assets/images/report.png",
+                                                  width: 100,
+                                                ),
+                                              )),
+                                          Positioned(
+                                              top: 45,
+                                              left: 15,
+                                              child: Text(
+                                                "Training Guide",
+                                                style: TextStyle(
+                                                    color: myWhite,
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 18),
+                                              )),
+                                        ],
+                                      ),
+                                    ),
+                                    Column(
+                                      children: [
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceEvenly,
+                                          children: [
+                                            trainingItem("bmi.png", "BMI", () {
+                                              Get.to(BMIPage());
+                                            }),
+                                            trainingItem("water.png", "Water",
+                                                () {
+                                              Get.to(WaterPage());
+                                            }),
+                                          ],
+                                        ),
+                                        gapHeightM2,
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceEvenly,
+                                          children: [
+                                            trainingItem(
+                                                "footstep.png", "Kcal Burn",
+                                                () {
+                                              Get.to(StepCountPage());
+                                            }),
+                                            trainingItem("sleep.png", "Sleep",
+                                                () {
+                                              Get.to(SleepCountPage());
+                                            }),
+                                          ],
+                                        ),
+                                        gapHeightM2,
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceEvenly,
+                                          children: [
+                                            trainingItem(
+                                                "calories.png", "kcal Intake",
+                                                () {
+                                              Get.to(CalorieCountPage());
+                                            }),
+                                            trainingItem(
+                                                "nutrition.png", "Nutrition",
+                                                () {
+                                              Get.to(NutritionCountPage());
+                                            }),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                    gapHeightM2,
+                                  ],
+                                ),
+                              ),
+                            ));
+                          } else {
+                            DashboardService.fetchReportDetailFullByMonth(
+                                    DateFormat("MM-yyyy")
+                                        .format(DateTime.now()))
+                                .then((value) {
+                              if (value != null) {
+                                if (value.status!) {
+                                  if (value.orderDetail!.status! ==
+                                      "completed") {
+                                    if (int.parse(
+                                            box.read(StorageConstant.point)) >=
+                                        30) {
+                                      DashboardService.saveUpdatePoints(
+                                              30, false)
+                                          .then((value) {
+                                        box.write(
+                                            StorageConstant.point,
+                                            (int.parse(box.read(StorageConstant
+                                                        .point)) -
+                                                    30)
+                                                .toString());
+                                        box.write(
+                                            StorageConstant.userStatus, true);
+                                        setState(() {});
+                                        Get.dialog(Dialog(
+                                          clipBehavior: Clip.hardEdge,
+                                          shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(12)),
+                                          child: Container(
+                                            width: 250,
+                                            child: Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                SizedBox(
+                                                  height: 150,
+                                                  child: Stack(
+                                                    children: [
+                                                      Positioned(
+                                                          top: 50,
+                                                          child: Text(
+                                                              "Traning Program")),
+                                                      ClipPath(
+                                                        clipper:
+                                                            LeftBottomClipper(),
+                                                        child: Container(
+                                                          height: 150,
+                                                          color: myPrimaryColor,
+                                                        ),
+                                                      ),
+                                                      Positioned(
+                                                          top: 15,
+                                                          right: 15,
+                                                          child: Card(
+                                                            child: Image.asset(
+                                                              "assets/images/report.png",
+                                                              width: 100,
+                                                            ),
+                                                          )),
+                                                    ],
+                                                  ),
+                                                ),
+                                                Column(
+                                                  children: [
+                                                    Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceEvenly,
+                                                      children: [
+                                                        trainingItem(
+                                                            "bmi.png", "BMI",
+                                                            () {
+                                                          Get.back();
+                                                          Get.to(BMIPage());
+                                                        }),
+                                                        trainingItem(
+                                                            "water.png",
+                                                            "Water", () {
+                                                          Get.back();
+                                                          Get.to(WaterPage());
+                                                        }),
+                                                      ],
+                                                    ),
+                                                    gapHeightM2,
+                                                    Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceEvenly,
+                                                      children: [
+                                                        trainingItem(
+                                                            "footstep.png",
+                                                            "Step", () {
+                                                          Get.back();
+                                                          Get.to(
+                                                              StepCountPage());
+                                                        }),
+                                                        trainingItem(
+                                                            "sleep.png",
+                                                            "Sleep", () {
+                                                          Get.back();
+                                                          Get.to(
+                                                              SleepCountPage());
+                                                        }),
+                                                      ],
+                                                    ),
+                                                    gapHeightM2,
+                                                    Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceEvenly,
+                                                      children: [
+                                                        trainingItem(
+                                                            "calories.png",
+                                                            "kcal Intake", () {
+                                                          Get.back();
+                                                          Get.to(
+                                                              CalorieCountPage());
+                                                        }),
+                                                        trainingItem(
+                                                            "nutrition.png",
+                                                            "Nutrition", () {
+                                                          Get.back();
+                                                          Get.to(
+                                                              NutritionCountPage());
+                                                        }),
+                                                      ],
+                                                    ),
+                                                  ],
+                                                ),
+                                                gapHeightM2,
+                                              ],
+                                            ),
+                                          ),
+                                        ));
+                                      });
+                                    } else {
+                                      Get.to(InfoPage());
+                                    }
+                                  } else if (value.orderDetail!.status! !=
+                                      "completed") {
+                                    Get.to(InfoPage());
+                                  }
+                                } else {
+                                  Get.defaultDialog(
+                                      title: "Alert",
+                                      middleText: "Please Book your Test");
+                                }
+                              } else {
+                                Get.defaultDialog(
+                                    title: "Alert",
+                                    middleText: "Please Book your Test");
+                              }
+                            });
+                          }
+                        },
+                      ),
                     ],
                   ),
-                  TextButton(onPressed: () {}, child: const Text("Add Family"))
-                ],
-              ),
-            ),
-            CarouselSlider(
-              options: CarouselOptions(
-                  height: 150.0,
-                  initialPage: 0,
-                  autoPlay: true,
-                  viewportFraction: 1,
-                  enlargeCenterPage: true),
-              items: [1].map((i) {
-                return Builder(
-                  builder: (BuildContext context) {
-                    return Image.asset(
-                      "assets/images/$i.png",
-                      width: Get.width,
-                    );
-                  },
-                );
-              }).toList(),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                BookTestChip(
-                  heading: "BOOK A TEST",
-                  label: "CLICK HEAR",
-                  icon: Icons.arrow_forward,
-                  onTap: () {
-                    Get.to(BookTestPage());
-                  },
                 ),
-                BookTestChip(
-                  heading: "TEST HISTORY",
-                  label: "CLICK HEAR",
-                  icon: Icons.arrow_forward,
-                  bgColor: Color(0xFF4feb8d),
-                  onTap: () {
-                    Get.to(TestHistoryPage());
-                  },
-                ),
-              ],
-            ),
-            SizedBox(
-              height: myHeightMedium,
-            ),
-            SizedBox(
-              height: 210,
-              width: double.infinity,
-              child: Stack(
-                alignment: Alignment.topCenter,
-                children: [
-                  Positioned(top: -90, child: _buildRadialTextPointer()),
-                  Positioned(
-                      bottom: 0,
-                      child: Text(
-                        "Your Health Chart",
-                        style: Get.theme.textTheme.headlineSmall!
-                            .copyWith(fontWeight: FontWeight.bold),
-                      )),
-                ],
-              ),
-            ),
-            Card(
-              elevation: 8,
-              child: Padding(
-                padding: EdgeInsets.all(8),
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              CircleAvatar(
-                                backgroundColor: underWeight,
-                                radius: 10,
-                              ),
-                              SizedBox(
-                                width: 10,
-                              ),
-                              Text("Under Weight"),
-                            ],
-                          ),
-                        ),
-                        Expanded(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              CircleAvatar(
-                                backgroundColor: good,
-                                radius: 10,
-                              ),
-                              SizedBox(
-                                width: 10,
-                              ),
-                              Text("Good"),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(
-                      height: 15,
-                    ),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              CircleAvatar(
-                                backgroundColor: overWeight,
-                                radius: 10,
-                              ),
-                              SizedBox(
-                                width: 10,
-                              ),
-                              Text("Over Weight"),
-                            ],
-                          ),
-                        ),
-                        Expanded(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              CircleAvatar(
-                                backgroundColor: obesity,
-                                radius: 10,
-                              ),
-                              SizedBox(
-                                width: 10,
-                              ),
-                              Text("Obesity"),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            reportFound.isEmpty
-                ? Container(
-                    child: Column(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Container(
-                            clipBehavior: Clip.hardEdge,
-                            decoration: BoxDecoration(
-                              boxShadow: [
-                                BoxShadow(
-                                    color: Colors.grey.shade400,
-                                    spreadRadius: 2,
-                                    blurRadius: 10,
-                                    offset: const Offset(2, 2))
-                              ],
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Container(
-                              color: myWhite,
-                              child: Column(
-                                children: [
-                                  Row(
-                                    children: [
-                                      Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: Text(
-                                          "Test Result $reportDate",
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.w700),
-                                        ),
-                                      )
-                                    ],
-                                  ),
-                                  Column(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: [
-                                      Table(
-                                        children:
-                                            reportData.map((e) => e).toList(),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  )
-                : Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 15),
-                    child: Text(
-                      reportFound.toUpperCase(),
-                      style: TextStyle(
-                        fontSize: 20,
-                      ),
-                    ),
-                  ),
-            Card(
-              elevation: 8,
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  "Let's Join Organic Urine Mission to save nature",
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ),
-            ),
-            Card(
-              elevation: 8,
-              color: myPrimaryColor,
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  "Refer Friend",
-                  style: TextStyle(fontWeight: FontWeight.bold, color: myWhite),
-                ),
-              ),
-            ),
-            Card(
-              elevation: 8,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8)),
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Row(
+                Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(
-                      FontAwesomeIcons.whatsappSquare,
-                      color: Colors.green,
-                      size: 28,
-                    ),
-                    SizedBox(
-                      width: 20,
-                    ),
-                    Icon(
-                      FontAwesomeIcons.facebookSquare,
-                      size: 28,
-                      color: Colors.blue,
-                    ),
-                    SizedBox(
-                      width: 20,
-                    ),
-                    Icon(
-                      FontAwesomeIcons.instagramSquare,
-                      size: 28,
-                      color: Colors.orange,
-                    ),
-                    SizedBox(
-                      width: 20,
-                    ),
-                    Icon(
-                      FontAwesomeIcons.share,
-                      size: 28,
-                      color: Colors.blue,
+                    Text("Refer"),
+                    IconButton(
+                      onPressed: () {
+                        try {
+                          Share.shareWithResult("Share Link").then((value) {
+                            DashboardService.saveUpdatePoints(10, true);
+                            box.write(
+                                StorageConstant.point,
+                                (int.parse(box.read(StorageConstant.point)) +
+                                        10)
+                                    .toString());
+                            setState(() {});
+                          });
+                        } catch (e) {}
+                      },
+                      icon: const Icon(
+                        FontAwesomeIcons.share,
+                        color: Colors.green,
+                        size: 28,
+                      ),
                     ),
                   ],
                 ),
+                ElevatedButton(
+                    onPressed: () {
+                      if (box.read(StorageConstant.userStatus)) {
+                        Get.to(DashboardPage());
+                      } else {
+                        DashboardService.fetchReportDetailFullByMonth(
+                                DateFormat("MM-yyyy").format(DateTime.now()))
+                            .then((value) {
+                          if (value != null) {
+                            if (value.status!) {
+                              print("Dasboard ${value.orderDetail!.status!}");
+                              if (value.orderDetail!.status! == "completed") {
+                                if (int.parse(
+                                        box.read(StorageConstant.point)) >=
+                                    30) {
+                                  DashboardService.saveUpdatePoints(30, false)
+                                      .then((value) {
+                                    box.write(
+                                        StorageConstant.point,
+                                        (int.parse(box.read(
+                                                    StorageConstant.point)) -
+                                                30)
+                                            .toString());
+                                    box.write(StorageConstant.userStatus, true);
+                                    setState(() {});
+                                    Get.to(DashboardPage());
+                                  });
+                                } else {
+                                  print("Else First");
+                                  Get.to(InfoPage());
+                                }
+                              } else if (value.orderDetail!.status! !=
+                                  "completed") {
+                                print("Else First");
+                                Get.to(InfoPage());
+                              }
+                            } else {
+                              Get.defaultDialog(
+                                  title: "Alert",
+                                  middleText: "Please Book your Test");
+                            }
+                          } else {
+                            Get.defaultDialog(
+                                title: "Alert",
+                                middleText: "Please Book your Test");
+                          }
+                        });
+                      }
+                    },
+                    child: Text("Dashboard")),
+                gapHeightL2,
+                gapHeightM2,
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  GestureDetector trainingItem(String image,
+      [String? name, void Function()? onTap]) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        children: [
+          Container(
+            width: 80,
+            height: 80,
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(40),
+                boxShadow: [
+                  BoxShadow(color: myPrimaryColor, offset: Offset(3, 3))
+                ]),
+            child: SizedBox(
+              width: 15,
+              height: 15,
+              child: Card(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(1000),
+                ),
+                elevation: 2,
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Image.asset(
+                    "assets/images/$image",
+                  ),
+                ),
               ),
             ),
-            Container(
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      MyChip(
-                        imagePath: "assets/images/bmi.png",
-                        name: "BMI",
-                        onTap: () {
-                          Get.to(BMIPage());
-                        },
-                      ),
-                      MyChip(
-                        imagePath: "assets/images/h2o.png",
-                        name: "H2O",
-                        onTap: () {
-                          Get.to(WaterPage());
-                        },
-                      ),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      MyChip(
-                        imagePath: "assets/images/footstep.png",
-                        name: "STEPS",
-                        onTap: () {
-                          Get.to(StepCountPage());
-                        },
-                      ),
-                      MyChip(
-                        imagePath: "assets/images/sleep.png",
-                        name: "SLEEP",
-                        onTap: () {
-                          Get.to(SleepCountPage());
-                        },
-                      ),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      MyChip(
-                        imagePath: "assets/images/calories.png",
-                        name: "CALORIE",
-                        onTap: () {
-                          Get.to(CalorieCountPage());
-                        },
-                      ),
-                      MyChip(
-                        imagePath: "assets/images/nutrition.png",
-                        name: "NUTRITION",
-                        onTap: () {
-                          Get.to(NutritionCountPage());
-                        },
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+          ),
+          if (name != null)
+            Column(
+              children: [
+                gapHeightS,
+                Text(name),
+              ],
             )
+        ],
+      ),
+    );
+  }
+
+  Widget circleButton(
+      {required String name,
+      String? name2,
+      required Color startColor,
+      required Color endColor,
+      void Function()? onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 130,
+        height: 130,
+        decoration: BoxDecoration(
+          color: myWhite,
+          borderRadius: BorderRadius.circular(1000),
+          boxShadow: const [
+            BoxShadow(
+              color: Colors.black26,
+              blurRadius: 4.0,
+            ),
           ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(10),
+          child: Container(
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(1000),
+                gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [startColor, endColor])),
+            child: Center(
+                child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  name,
+                  style: TextStyle(
+                      color: myWhite, decoration: TextDecoration.underline),
+                ),
+                if (name2 != null)
+                  Text(
+                    name2,
+                    style: TextStyle(color: myWhite),
+                  )
+              ],
+            )),
+          ),
         ),
       ),
     );
   }
 
   double getBmi() {
-    String height = box.read(StorageConstant.height);
-    String weight = box.read(StorageConstant.height);
-    int h = int.parse(height);
-    int w = int.parse(weight);
-    double v = w / ((h / 100) * (h / 100));
-    print("BMI:: $w $h $v");
-    if (v < 18.5) {
-      return 22.5;
-    } else if (v >= 18.5 && v < 24.9) {
-      return 45;
-    } else if (v >= 24.9 && v < 29.9) {
-      return 75;
-    } else {
-      return 105;
-    }
+    return BMI.getBmi(
+        height: int.parse(box.read(StorageConstant.height)),
+        weight: int.parse(box.read(StorageConstant.weight)));
   }
 
   SfRadialGauge _buildRadialTextPointer() {
@@ -634,7 +961,7 @@ class _HomePageState extends State<HomePage> {
                   value: getBmi(),
                   animationDuration: 3000,
                   enableAnimation: true,
-                  knobStyle: KnobStyle(knobRadius: 0)),
+                  knobStyle: const KnobStyle(knobRadius: 0)),
             ],
             ranges: <GaugeRange>[
               GaugeRange(
@@ -721,9 +1048,22 @@ class _HomePageState extends State<HomePage> {
       ],
     );
   }
+}
 
+class LeftBottomClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    final path = Path();
 
+    path.lineTo(0, size.height - 50);
+    path.lineTo(size.width, size.height);
+    path.lineTo(size.width, 0);
 
+    return path;
+  }
+
+  @override
+  bool shouldReclip(covariant CustomClipper<Path> oldClipper) => false;
 }
 
 class MyChip extends StatelessWidget {
@@ -750,7 +1090,7 @@ class MyChip extends StatelessWidget {
         child: GestureDetector(
           onTap: onTap ?? () {},
           child: Container(
-            padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
             decoration: BoxDecoration(
               boxShadow: [
                 BoxShadow(
@@ -772,7 +1112,7 @@ class MyChip extends StatelessWidget {
                     width: width ?? 30,
                   ),
                 ),
-                SizedBox(
+                const SizedBox(
                   width: 5,
                 ),
                 Text(
@@ -807,7 +1147,7 @@ class BookTestChip extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: EdgeInsets.symmetric(
+        padding: const EdgeInsets.symmetric(
             horizontal: myPaddingLarge, vertical: myPaddingMedium),
         decoration: BoxDecoration(
             color: bgColor ?? myAccentColor,
@@ -879,7 +1219,7 @@ class CustomListMenuItem extends StatelessWidget {
           children: [
             Row(
               children: [
-                SizedBox(
+                const SizedBox(
                   width: 10,
                 ),
                 Icon(

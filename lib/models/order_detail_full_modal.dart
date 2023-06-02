@@ -4,98 +4,128 @@
 
 import 'dart:convert';
 
-OrderDetailFullModal orderDetailFullModalFromJson(String str) => OrderDetailFullModal.fromJson(json.decode(str));
+OrderDetailFullModal orderDetailFullModalFromJson(String str) =>
+    OrderDetailFullModal.fromJson(json.decode(str));
 
-String orderDetailFullModalToJson(OrderDetailFullModal data) => json.encode(data.toJson());
+String orderDetailFullModalToJson(OrderDetailFullModal data) =>
+    json.encode(data.toJson());
 
 class OrderDetailFullModal {
-    final bool? status;
-    final OrderDetail? orderDetail;
-    final List<ReportDetail>? reportDetail;
+  final bool? status;
+  final String? msg;
+  final OrderDetail? orderDetail;
+  final List<ReportDetail>? reportDetail;
 
-    OrderDetailFullModal({
-        this.status,
-        this.orderDetail,
-        this.reportDetail,
-    });
+  OrderDetailFullModal(
+      {this.status, this.orderDetail, this.reportDetail, this.msg});
 
-    factory OrderDetailFullModal.fromJson(Map<String, dynamic> json) => OrderDetailFullModal(
+  factory OrderDetailFullModal.fromJson(Map<String, dynamic> json) =>
+      OrderDetailFullModal(
         status: json["status"],
-        orderDetail: json["order_detail"] == null ? null : OrderDetail.fromJson(json["order_detail"]),
-        reportDetail: json["report_detail"] == null ? [] : List<ReportDetail>.from(json["report_detail"]!.map((x) => ReportDetail.fromJson(x))),
-    );
+        msg: json["msg"],
+        orderDetail: json["order_detail"] == null
+            ? null
+            : OrderDetail.fromJson(json["order_detail"]),
+        reportDetail: json["report_detail"] == null
+            ? []
+            : List<ReportDetail>.from(
+                json["report_detail"]!.map((x) => ReportDetail.fromJson(x))),
+      );
 
-    Map<String, dynamic> toJson() => {
+  Map<String, dynamic> toJson() => {
         "status": status,
         "order_detail": orderDetail?.toJson(),
-        "report_detail": reportDetail == null ? [] : List<dynamic>.from(reportDetail!.map((x) => x.toJson())),
-    };
+        "report_detail": reportDetail == null
+            ? []
+            : List<dynamic>.from(reportDetail!.map((x) => x.toJson())),
+      };
 }
 
 class OrderDetail {
-    final String? id;
-    final String? orderNo;
-    final String? testName;
-    final DateTime? scheduledPicktimeStart;
+  final String? id;
+  final String? orderNo;
+  final String? bmi;
+  final String? testName;
+  final String? locked;
+  final String? status;
+  final DateTime? scheduledPicktimeStart;
 
-    OrderDetail({
-        this.id,
-        this.orderNo,
-        this.testName,
-        this.scheduledPicktimeStart,
-    });
+  OrderDetail({
+    this.id,
+    this.orderNo,
+    this.testName,
+    this.locked,
+    this.bmi,
+    this.status,
+    this.scheduledPicktimeStart,
+  });
 
-    factory OrderDetail.fromJson(Map<String, dynamic> json) => OrderDetail(
+  factory OrderDetail.fromJson(Map<String, dynamic> json) => OrderDetail(
         id: json["id"],
         orderNo: json["order_no"],
         testName: json["test_name"],
-        scheduledPicktimeStart: json["scheduled_picktime_start"] == null ? null : DateTime.parse(json["scheduled_picktime_start"]),
-    );
+        locked: json["locked"],
+        status: json["status"],
+        bmi: json["bmi"],
+        scheduledPicktimeStart: json["scheduled_picktime_start"] == null
+            ? null
+            : DateTime.parse(json["scheduled_picktime_start"]),
+      );
 
-    Map<String, dynamic> toJson() => {
+  Map<String, dynamic> toJson() => {
         "id": id,
         "order_no": orderNo,
         "test_name": testName,
         "scheduled_picktime_start": scheduledPicktimeStart?.toIso8601String(),
-    };
+      };
 }
 
 class ReportDetail {
-    final String? id;
-    final String? orderId;
-    final String? variableId;
-    final String? name;
-    final String? value;
-    final DateTime? createAt;
-    final String? alise;
+  final String? id;
+  final String? orderId;
+  final String? variableId;
+  final String? name;
+  final String? fname;
+  final String? value;
+  final DateTime? createAt;
+  final String? alise;
+  final String? condtion;
 
-    ReportDetail({
-        this.id,
-        this.orderId,
-        this.variableId,
-        this.name,
-        this.value,
-        this.createAt,
-        this.alise,
-    });
+  ReportDetail({
+    this.id,
+    this.orderId,
+    this.variableId,
+    this.name,
+    this.fname,
+    this.value,
+    this.createAt,
+    this.alise,
+    this.condtion,
+  });
 
-    factory ReportDetail.fromJson(Map<String, dynamic> json) => ReportDetail(
+  factory ReportDetail.fromJson(Map<String, dynamic> json) => ReportDetail(
         id: json["id"],
         orderId: json["order_id"],
         variableId: json["variable_id"],
         name: json["name"],
+        fname: json["fname"],
         value: json["value"],
-        createAt: json["create_at"] == null ? null : DateTime.parse(json["create_at"]),
+        createAt: json["create_at"] == null
+            ? null
+            : DateTime.parse(json["create_at"]),
         alise: json["alise"],
-    );
+        condtion: json["p_condition"],
+      );
 
-    Map<String, dynamic> toJson() => {
+  Map<String, dynamic> toJson() => {
         "id": id,
         "order_id": orderId,
         "variable_id": variableId,
         "name": name,
+        "fname": fname,
         "value": value,
         "create_at": createAt?.toIso8601String(),
         "alise": alise,
-    };
+        "p_condition": condtion,
+      };
 }

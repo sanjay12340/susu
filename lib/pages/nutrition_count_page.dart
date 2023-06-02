@@ -72,7 +72,7 @@ class _NutritionCountPageState extends State<NutritionCountPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Nutition'),
+        title: const Text('Nutrition'),
       ),
       backgroundColor: Color(0xFFf5f5f5),
       body: Container(
@@ -356,7 +356,11 @@ class _NutritionCountPageState extends State<NutritionCountPage> {
                   child: Row(
                     children: [
                       CircleAvatar(
-                        child: Icon(Icons.food_bank),
+                        backgroundColor: myPrimaryColor,
+                        child: Icon(
+                          Icons.food_bank,
+                          color: myWhite,
+                        ),
                       ),
                       SizedBox(
                         width: 10,
@@ -398,7 +402,11 @@ class _NutritionCountPageState extends State<NutritionCountPage> {
                   child: Row(
                     children: [
                       CircleAvatar(
-                        child: Icon(Icons.food_bank),
+                        backgroundColor: myPrimaryColor,
+                        child: Icon(
+                          Icons.food_bank,
+                          color: myWhite,
+                        ),
                       ),
                       SizedBox(
                         width: 10,
@@ -440,7 +448,11 @@ class _NutritionCountPageState extends State<NutritionCountPage> {
                   child: Row(
                     children: [
                       CircleAvatar(
-                        child: Icon(Icons.food_bank),
+                        backgroundColor: myPrimaryColor,
+                        child: Icon(
+                          Icons.food_bank,
+                          color: myWhite,
+                        ),
                       ),
                       SizedBox(
                         width: 10,
@@ -511,7 +523,11 @@ class _NutritionCountPageState extends State<NutritionCountPage> {
                   child: Row(
                     children: [
                       CircleAvatar(
-                        child: Icon(Icons.food_bank),
+                        backgroundColor: myPrimaryColor,
+                        child: Icon(
+                          Icons.food_bank,
+                          color: myWhite,
+                        ),
                       ),
                       SizedBox(
                         width: 10,
@@ -553,7 +569,8 @@ class _NutritionCountPageState extends State<NutritionCountPage> {
                   child: Row(
                     children: [
                       CircleAvatar(
-                        child: Icon(Icons.food_bank),
+                        backgroundColor: myPrimaryColor,
+                        child: Icon(Icons.food_bank, color: myWhite),
                       ),
                       SizedBox(
                         width: 10,
@@ -595,7 +612,11 @@ class _NutritionCountPageState extends State<NutritionCountPage> {
                   child: Row(
                     children: [
                       CircleAvatar(
-                        child: Icon(Icons.food_bank),
+                        backgroundColor: myPrimaryColor,
+                        child: Icon(
+                          Icons.food_bank,
+                          color: myWhite,
+                        ),
                       ),
                       SizedBox(
                         width: 10,

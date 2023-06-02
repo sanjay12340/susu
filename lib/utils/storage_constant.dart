@@ -28,4 +28,10 @@ class StorageConstant {
   static const weight = "weight";
   static const gender = "gender";
   static const point = "point";
+  static const lab = "lab";
+  static const upcoming = "upcoming";
+  static const today = "today";
+  static const history = "history";
+  static const userStatus = "user_status";
+  static const lastOrderDate = "last_order_date";
 }
