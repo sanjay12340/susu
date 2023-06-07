@@ -59,6 +59,26 @@ class DashboardService {
     }
   }
 
+  static Future<Map<String, dynamic>?> updatePassword(
+      String email, String otp, String password) async {
+    String uri =
+        "$main_url$token&update_password=yes&email=$email&otp=$otp&password=$password";
+    print(uri);
+    var url = Uri.parse(uri);
+    var responce = await client.get(url);
+    try {
+      if (responce.statusCode == 200) {
+        var jsonbody = responce.body;
+
+        return jsonDecode(jsonbody);
+      } else {
+        return null;
+      }
+    } catch (e) {
+      return null;
+    }
+  }
+
   static Future<UserOrderDetailModal?> fetchUserDetailByOrderNo(
       {required String orderNo}) async {
     String uri = "$main_url$token&fetch_user_order_no=$orderNo";
@@ -486,7 +506,7 @@ class DashboardService {
         return null;
       }
     } catch (e) {
-      print("catch $e");
+      print("catch $e ${e}");
       return null;
     }
   }
@@ -532,7 +552,7 @@ class DashboardService {
 
   static Future<SleepHistoryDetailModal?> fetchSleepTrack(
       {required String userId, required int limit}) async {
-    print("$main_url$token&fetch_step_track=yes&user_id=$userId");
+    print("$main_url$token&fetch_sleep_track=yes&user_id=$userId");
     var url = Uri.parse(
         "$main_url$token&fetch_sleep_track=yes&user_id=$userId&limit=$limit&offset=0");
     var response = await client.get(url);

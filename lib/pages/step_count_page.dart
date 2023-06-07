@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:susu/models/step_history_detail_modal.dart';
@@ -40,9 +41,10 @@ class _StepCountPageState extends State<StepCountPage> {
     ];
   }
 
+  var _stepController = TextEditingController();
   int todayStep = 0;
   int todayStepFull = 0;
-  int maxStep = 10000;
+  int maxStep = 1;
   double _value = 0;
   double _value1 = 20;
   double _value2 = 20;
@@ -62,7 +64,18 @@ class _StepCountPageState extends State<StepCountPage> {
 
   void saveStep() {
     DashboardService.saveStepTrack(
-        step: todayStepFull, userId: box.read(StorageConstant.id));
+            step: int.parse(_stepController.text),
+            userId: box.read(StorageConstant.id))
+        .then((value) {
+      _stepController.text = "";
+      Get.snackbar(
+        "Step",
+        "Saved",
+        colorText: Colors.white,
+        backgroundColor: Colors.black38,
+        icon: const Icon(Icons.info),
+      );
+    });
   }
 
   void fetchDetail() {
@@ -72,10 +85,11 @@ class _StepCountPageState extends State<StepCountPage> {
       if (value != null) {
         Today? today = value.today;
         List<Today>? history = value.history;
+        DateTime? lastOrderDate = today?.lastOrderDate;
 
         setState(() {
           if (today != null) {
-            maxStep = int.parse(today.goal ?? "10000");
+            maxStep = int.parse(today.goal ?? "");
             todayStepFull = todayStep = int.parse(today.steps ?? "0");
             double per = (todayStep * 100) / maxStep;
             if (per <= 100) {
@@ -88,7 +102,7 @@ class _StepCountPageState extends State<StepCountPage> {
             }
           }
 
-          if (history != null) {
+          if (history != null && lastOrderDate != null) {
             DateTime now = DateTime.now();
 
             DateFormat dateFormat = DateFormat('yyyy-MM-dd');
@@ -99,7 +113,9 @@ class _StepCountPageState extends State<StepCountPage> {
               String formatedDate = dateFormat.format(date);
               Today? t = history.firstWhereOrNull((element) =>
                   formatedDate == dateFormat.format(element.date!));
+              print("Steps ${t.toString()}");
               int v = t != null ? int.parse(t.steps ?? "0") : 0;
+              print("${dateFinal.format(date)} $v");
               chartData.add(BarModel(name: dateFinal.format(date), value: v));
             }
             chartData = chartData.reversed.toList();
@@ -111,293 +127,331 @@ class _StepCountPageState extends State<StepCountPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Calorie Exercise Calculator'),
-      ),
-      backgroundColor: Color(0xFFF5F5F5),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            const SizedBox(
-              height: 10,
-            ),
-            Card(
-              elevation: 0,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          Text(
-                            "Recommended Goal $maxStep",
-                            style: const TextStyle(
-                                fontSize: 20, fontWeight: FontWeight.bold),
-                          ),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          Row(
-                            children: [
-                              IconButton(
-                                  onPressed: () {
-                                    setState(() {
-                                      int f = todayStep - 200;
-                                      // if (maxStep <= f) {
-                                      //   print("maxStep $f");
-                                      //   f = maxStep;
-                                      // }
-                                      if (f <= 0) {
-                                        f = 0;
-                                      }
-                                      todayStepFull = todayStep = f;
-                                      double per = (todayStep * 100) / maxStep;
-                                      if (per <= 100) {
-                                        _value = per;
-                                      } else {
-                                        _value = 100;
-                                      }
-                                      if (per <= 0) {
-                                        _value = 0;
-                                      }
+    return WillPopScope(
+      onWillPop: () async {
+        // Hide the keyboard
+        FocusScope.of(context).unfocus();
 
-                                      saveStep();
-                                    });
-                                  },
-                                  icon: const Icon(
-                                    Icons.remove_circle_outlined,
-                                  )),
-                              _getFourthProgressBar(),
-                              IconButton(
-                                  onPressed: () {
-                                    setState(() {
-                                      int f = todayStep + 200;
-                                      // if (maxStep <= f) {
-                                      //   print("maxStep $f");
-                                      //   f = maxStep;
-                                      // }
-                                      if (f <= 0) {
-                                        f = 0;
-                                      }
-                                      todayStepFull = todayStep = f;
-                                      double per = (todayStep * 100) / maxStep;
-                                      if (per <= 100) {
-                                        _value = per;
-                                      } else {
-                                        _value = 100;
-                                      }
-                                      if (per <= 0) {
-                                        _value = 0;
-                                      }
-                                      saveStep();
-                                    });
-                                  },
-                                  icon: const Icon(Icons.add_circle_outlined)),
+        // Wait for a short duration to allow the keyboard to hide
+        await Future.delayed(Duration(milliseconds: 100));
+
+        // Perform the back action
+        return true; // Set to false to prevent the back action
+      },
+      child: GestureDetector(
+        onTap: () {
+          // call this method here to hide soft keyboard
+          FocusScope.of(context).requestFocus(new FocusNode());
+        },
+        child: Scaffold(
+          appBar: AppBar(
+            title: const Text('Calorie Exercise Calculator'),
+          ),
+          backgroundColor: Color(0xFFF5F5F5),
+          body: SingleChildScrollView(
+            child: Column(
+              children: [
+                const SizedBox(
+                  height: 10,
+                ),
+                Card(
+                  elevation: 0,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              Text.rich(
+                                TextSpan(text: "Recommended Goal-", children: [
+                                  TextSpan(
+                                      text: "${maxStep > 1 ? maxStep : ''}",
+                                      style: TextStyle(color: Colors.green))
+                                ]),
+                                style: const TextStyle(
+                                    fontSize: 20, fontWeight: FontWeight.bold),
+                              ),
+                              const SizedBox(
+                                height: 10,
+                              ),
+                              Row(
+                                children: [
+                                  _getFourthProgressBar(),
+                                ],
+                              ),
+                              Center(
+                                  child: Text("Today's Step $todayStepFull")),
+                              if (_value >= 100)
+                                Column(
+                                  children: [
+                                    gapHeightM2,
+                                    Row(
+                                      children: [
+                                        Icon(Icons.thumb_up,
+                                            color: Colors.amber.shade600),
+                                        gapWidthM2,
+                                        const Text("Goal Completed")
+                                      ],
+                                    )
+                                  ],
+                                ),
+                              gapHeightM2,
+                              Row(
+                                children: [
+                                  SizedBox(
+                                      width: 150,
+                                      child: TextField(
+                                        controller: _stepController,
+                                        keyboardType: TextInputType.number,
+                                        inputFormatters: [
+                                          FilteringTextInputFormatter.digitsOnly
+                                        ],
+                                        decoration: InputDecoration(
+                                            isCollapsed: true,
+                                            hintText: "Enter steps",
+                                            contentPadding:
+                                                EdgeInsets.symmetric(
+                                                    horizontal: 5, vertical: 9),
+                                            border: OutlineInputBorder()),
+                                      )),
+                                  gapWidthM2,
+                                  ElevatedButton(
+                                      onPressed: () {
+                                        if (_stepController.text.isNotEmpty) {
+                                          FocusScope.of(context)
+                                              .requestFocus(new FocusNode());
+                                          setState(() {
+                                            int f = todayStep +
+                                                int.parse(_stepController.text);
+
+                                            if (f <= 0) {
+                                              f = 0;
+                                            }
+                                            todayStepFull = todayStep = f;
+                                            double per =
+                                                (todayStep * 100) / maxStep;
+                                            if (per <= 100) {
+                                              _value = per;
+                                            } else {
+                                              _value = 100;
+                                            }
+                                            if (per <= 0) {
+                                              _value = 0;
+                                            }
+                                            saveStep();
+                                          });
+                                        }
+                                      },
+                                      child: const Text("Save"))
+                                ],
+                              )
+                            ]),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Center(
+                      child: Text(
+                    "Calorie Burned Calculator - Activity Based",
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  )),
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
+                Card(
+                  elevation: 0,
+                  child: Padding(
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            children: [
+                              Row(
+                                children: const [
+                                  Text(
+                                    "Walking",
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold),
+                                  )
+                                ],
+                              )
                             ],
                           ),
-                          Center(child: Text("Today Step $todayStepFull")),
-                        ]),
-                  ],
+                        ),
+                        IconButton(
+                            onPressed: () {
+                              Get.to(const StepCaloriePage(
+                                name: "Walking",
+                                image: "walking.png",
+                              ));
+                            },
+                            icon: Icon(
+                              Icons.add_circle_outline,
+                              color: myPrimaryColor,
+                            )),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Center(
-                  child: Text(
-                "Calorie Burned Calculator - Activity Based",
-                style: TextStyle(fontWeight: FontWeight.bold),
-              )),
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            Card(
-              elevation: 0,
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        children: [
-                          Row(
-                            children: const [
-                              Text(
-                                "Walking",
-                                style: TextStyle(fontWeight: FontWeight.bold),
+                const SizedBox(
+                  height: 10,
+                ),
+                Card(
+                  elevation: 0,
+                  child: Padding(
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            children: [
+                              Row(
+                                children: const [
+                                  Text(
+                                    "Running",
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold),
+                                  )
+                                ],
                               )
                             ],
-                          )
-                        ],
-                      ),
+                          ),
+                        ),
+                        IconButton(
+                            onPressed: () {
+                              Get.to(const StepCaloriePage(
+                                name: "Running",
+                                image: "running.png",
+                              ));
+                            },
+                            icon: Icon(
+                              Icons.add_circle_outline,
+                              color: myPrimaryColor,
+                            )),
+                      ],
                     ),
-                    IconButton(
-                        onPressed: () {
-                          Get.to(const StepCaloriePage(
-                            name: "Walking",
-                            image: "walking.png",
-                          ));
-                        },
-                        icon: Icon(
-                          Icons.add_circle_outline,
-                          color: myPrimaryColor,
-                        )),
-                  ],
+                  ),
                 ),
-              ),
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            Card(
-              elevation: 0,
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        children: [
-                          Row(
-                            children: const [
-                              Text(
-                                "Running",
-                                style: TextStyle(fontWeight: FontWeight.bold),
+                const SizedBox(
+                  height: 10,
+                ),
+                Card(
+                  elevation: 0,
+                  child: Padding(
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            children: [
+                              Row(
+                                children: const [
+                                  Text(
+                                    "Cycling",
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold),
+                                  )
+                                ],
                               )
                             ],
-                          )
-                        ],
-                      ),
+                          ),
+                        ),
+                        IconButton(
+                            onPressed: () {
+                              Get.to(const StepCaloriePage(
+                                name: "Cycling",
+                                image: "bicycling.gif",
+                              ));
+                            },
+                            icon: Icon(
+                              Icons.add_circle_outline,
+                              color: myPrimaryColor,
+                            )),
+                      ],
                     ),
-                    IconButton(
-                        onPressed: () {
-                          Get.to(const StepCaloriePage(
-                            name: "Running",
-                            image: "running.png",
-                          ));
-                        },
-                        icon: Icon(
-                          Icons.add_circle_outline,
-                          color: myPrimaryColor,
-                        )),
-                  ],
+                  ),
                 ),
-              ),
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            Card(
-              elevation: 0,
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        children: [
-                          Row(
-                            children: const [
-                              Text(
-                                "Cycling",
-                                style: TextStyle(fontWeight: FontWeight.bold),
+                const SizedBox(
+                  height: 10,
+                ),
+                Card(
+                  elevation: 0,
+                  child: Padding(
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            children: [
+                              Row(
+                                children: const [
+                                  Text(
+                                    "Swimming",
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold),
+                                  )
+                                ],
                               )
                             ],
-                          )
-                        ],
-                      ),
+                          ),
+                        ),
+                        IconButton(
+                            onPressed: () {
+                              Get.to(const StepCalorieSwimmingPage(
+                                name: "Swimming",
+                                image: 'Swimming.png',
+                              ));
+                            },
+                            icon: Icon(
+                              Icons.add_circle_outline,
+                              color: myPrimaryColor,
+                            )),
+                      ],
                     ),
-                    IconButton(
-                        onPressed: () {
-                          Get.to(const StepCaloriePage(
-                            name: "Cycling",
-                            image: "bicycling.gif",
-                          ));
-                        },
-                        icon: Icon(
-                          Icons.add_circle_outline,
-                          color: myPrimaryColor,
-                        )),
-                  ],
+                  ),
                 ),
-              ),
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            Card(
-              elevation: 0,
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        children: [
-                          Row(
-                            children: const [
-                              Text(
-                                "Swimming",
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              )
-                            ],
-                          )
-                        ],
-                      ),
+                SizedBox(
+                  height: 10,
+                ),
+                Card(
+                  elevation: 0,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Step History",
+                          style: TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                        Container(
+                            width: Get.width - 10,
+                            height: 300,
+                            child: charts.BarChart(
+                              createSampleModel(),
+                              animate: true,
+                            )),
+                      ],
                     ),
-                    IconButton(
-                        onPressed: () {
-                          Get.to(const StepCalorieSwimmingPage(
-                            name: "Swimming",
-                            image: 'Swimming.png',
-                          ));
-                        },
-                        icon: Icon(
-                          Icons.add_circle_outline,
-                          color: myPrimaryColor,
-                        )),
-                  ],
-                ),
-              ),
+                  ),
+                )
+              ],
             ),
-            SizedBox(
-              height: 10,
-            ),
-            Card(
-              elevation: 0,
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Step History",
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    Container(
-                        width: Get.width - 10,
-                        height: 300,
-                        child: charts.BarChart(
-                          createSampleModel(),
-                          animate: true,
-                        )),
-                  ],
-                ),
-              ),
-            )
-          ],
+          ),
         ),
       ),
     );

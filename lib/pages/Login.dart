@@ -14,6 +14,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:susu/utils/storage_constant.dart';
+import 'package:susu/utils/util.dart';
 import 'forget_password_first.dart';
 
 import 'sing_up_page.dart';
@@ -49,6 +50,7 @@ class _LoginPageState extends State<LoginPage> {
     });
     super.initState();
     getToken();
+    box.write(StorageConstant.firstTimeUser, false);
   }
 
   getToken() async {
@@ -72,11 +74,11 @@ class _LoginPageState extends State<LoginPage> {
             mainAxisSize: MainAxisSize.max,
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              Card(
-                  child: Image.asset(
+              Image.asset(
                 "assets/images/logo.png",
+                color: myWhite,
                 width: 100,
-              )),
+              ),
               Container(
                 alignment: Alignment.bottomCenter,
                 decoration: BoxDecoration(
@@ -90,7 +92,7 @@ class _LoginPageState extends State<LoginPage> {
                     const Padding(
                       padding: EdgeInsets.symmetric(vertical: 20),
                       child: Text(
-                        "Welcome to  SUSU Labs",
+                        "Welcome to SUSU Labs",
                         style: TextStyle(
                             fontSize: 25, fontWeight: FontWeight.bold),
                       ),
@@ -108,8 +110,7 @@ class _LoginPageState extends State<LoginPage> {
                         const SizedBox(
                           height: 15,
                         ),
-                        const Text(
-                            "Please enter your mobile number and password"),
+                        const Text("Please enter your login credentials"),
                         const SizedBox(
                           height: 15,
                         ),
@@ -122,14 +123,14 @@ class _LoginPageState extends State<LoginPage> {
                                 TextFormField(
                                   controller: _username,
                                   decoration: const InputDecoration(
-                                      labelText: 'Username/Phone',
+                                      labelText: 'Email',
                                       border: OutlineInputBorder()),
                                   validator: (value) {
                                     if (value == null) {
-                                      return "Please provide username";
+                                      return "Please provide email id";
                                     }
                                     if (value.isEmpty) {
-                                      return 'Please enter your username';
+                                      return 'Please enter your email id';
                                     }
                                     return null;
                                   },
@@ -145,7 +146,7 @@ class _LoginPageState extends State<LoginPage> {
                                       border: OutlineInputBorder()),
                                   validator: (value) {
                                     if (value == null) {
-                                      return "Please provide username";
+                                      return "Please provide Password";
                                     }
                                     if (value.isEmpty) {
                                       return 'Please enter your password';
@@ -179,42 +180,7 @@ class _LoginPageState extends State<LoginPage> {
                                               Map<String, dynamic> user =
                                                   value['user'];
 
-                                              box.write(StorageConstant.id,
-                                                  user['id']);
-                                              box.write(
-                                                  StorageConstant.isLoggedIn,
-                                                  true);
-                                              box.write(
-                                                  StorageConstant.username,
-                                                  user['username']);
-                                              box.write(StorageConstant.name,
-                                                  user['name']);
-                                              box.write(StorageConstant.dob,
-                                                  user['dob']);
-                                              box.write(StorageConstant.email,
-                                                  user['email']);
-
-                                              box.write(
-                                                  StorageConstant.user_type,
-                                                  user['user_type']);
-                                              box.write(StorageConstant.gender,
-                                                  user['sex']);
-                                              box.write(StorageConstant.height,
-                                                  user['height']);
-                                              box.write(StorageConstant.weight,
-                                                  user['weight']);
-                                              box.write(StorageConstant.point,
-                                                  user['point']);
-
-
-                                              box.write(
-                                                  StorageConstant.lastOrderDate,
-                                                  user['last_order_date']);
-                                              print(
-                                                  "Last order Date ::: ${user['last_order_date']}");
-                                              box.write(
-                                                  StorageConstant.userStatus,
-                                                  user['user_status'] == "1");
+                                              Util.storeValueOfUser(user);
 
                                               box.write(StorageConstant.lab,
                                                   user['user_type'] == "lab");
@@ -277,25 +243,6 @@ class _LoginPageState extends State<LoginPage> {
                                 ),
                                 const SizedBox(
                                   height: 10,
-                                ),
-                                const Text(
-                                  "By Logging in  or signing up. you agree to the policy ",
-                                  style: TextStyle(fontSize: 14),
-                                ),
-                                const SizedBox(
-                                  height: 10,
-                                ),
-                                GestureDetector(
-                                  onTap: () {
-                                    if (_formKey.currentState!.validate()) {
-                                      // submit form data to backend
-                                    }
-                                  },
-                                  child: const Text(
-                                    'Privacy Policy & Terms and conditions',
-                                    style: TextStyle(
-                                        fontSize: 14, color: Colors.blue),
-                                  ),
                                 ),
                               ],
                             ),

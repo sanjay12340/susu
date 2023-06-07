@@ -1,6 +1,7 @@
 import 'package:susu/lab_pages/lab_home_page.dart';
 import 'package:susu/pages/Login.dart';
 import 'package:susu/pages/home_page.dart';
+import 'package:susu/pages/splash_page.dart';
 import 'package:susu/utils/links.dart';
 import 'package:susu/utils/mycontant.dart';
 import 'package:susu/utils/value_constant.dart';
@@ -22,6 +23,7 @@ void main() async {
   box.writeIfNull(StorageConstant.isLoggedIn, false);
   box.writeIfNull('isGameShow', false);
   box.writeIfNull(StorageConstant.live, false);
+  box.writeIfNull(StorageConstant.firstTimeUser, true);
   box.writeIfNull(ValueConstant.upi, '');
   runApp(MyApp());
 }
@@ -51,13 +53,22 @@ class _MyAppState extends State<MyApp> {
           buttonTheme: ButtonThemeData(
               buttonColor: myPrimaryColorDark,
               textTheme: ButtonTextTheme.primary)),
-      home: (box.read(StorageConstant.isLoggedIn) == null ||
-              !box.read(StorageConstant.isLoggedIn))
-          ? LoginPage()
-          : (box.read(StorageConstant.lab) != null &&
-                  box.read(StorageConstant.lab))
-              ? LabHomePage()
-              : HomePage(),
+      home: screenRoute(),
     );
+  }
+
+  Widget screenRoute() {
+    if (box.read(StorageConstant.firstTimeUser) != null &&
+        box.read(StorageConstant.firstTimeUser)) {
+      return const SplashPage();
+    }
+
+    return (box.read(StorageConstant.isLoggedIn) == null ||
+            !box.read(StorageConstant.isLoggedIn))
+        ? LoginPage()
+        : (box.read(StorageConstant.lab) != null &&
+                box.read(StorageConstant.lab))
+            ? LabHomePage()
+            : HomePage();
   }
 }

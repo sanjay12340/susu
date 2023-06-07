@@ -223,10 +223,10 @@ class _StepCaloriePageState extends State<StepCaloriePage> {
                           child: TextFormField(
                         readOnly: true,
                         controller: caloryController,
-                        decoration: InputDecoration(
+                        decoration: const InputDecoration(
                             border: UnderlineInputBorder(
                                 borderSide: BorderSide.none),
-                            hintText: 'Calory Burn'),
+                            hintText: 'Calorie Burn'),
                       )),
                       Chip(
                         text: "Cal",

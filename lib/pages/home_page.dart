@@ -62,6 +62,32 @@ class _HomePageState extends State<HomePage> {
     fetchLatestReport();
   }
 
+  String? subscriptionDaysLeft() {
+    print("days check  ${box.read(StorageConstant.next_date)}");
+    if (box.read(StorageConstant.userStatus) != null &&
+        box.read(StorageConstant.userStatus) == false) {
+      return "Profile: Locked";
+    }
+    if (box.read(StorageConstant.next_date) != null) {
+      DateTime currentDate = DateTime.now();
+      DateTime nextDate =
+          DateFormat('yyyy-MM-dd').parse(box.read(StorageConstant.next_date));
+      int days = nextDate.difference(currentDate).inDays;
+      return "Subscription Days Left : ${days == 0 ? "-" : days}";
+    }
+    return "Subscription Days Left : Locked";
+  }
+
+  int? nextBookingDays() {
+    if (box.read(StorageConstant.next_date) != null) {
+      DateTime currentDate = DateTime.now();
+      DateTime nextDate =
+          DateFormat('yyyy-MM-dd').parse(box.read(StorageConstant.next_date));
+      int days = nextDate.difference(currentDate).inDays;
+      return days;
+    }
+  }
+
   void fetchLatestReport() {
     DashboardService.fetchLatestReport(box.read(StorageConstant.id))
         .then((value) {
@@ -170,11 +196,9 @@ class _HomePageState extends State<HomePage> {
                       const SizedBox(
                         width: 20,
                       ),
-                      Icon(
-                        Icons.account_circle,
-                        color: myPrimaryColorDark,
-                        size: 60,
-                      ),
+                      Image.asset(
+                          "assets/images/${box.read(StorageConstant.gender) == "male" ? 'male' : 'female'}.png",
+                          width: 70),
                       const SizedBox(
                         width: 10,
                       ),
@@ -184,12 +208,12 @@ class _HomePageState extends State<HomePage> {
                           Text(
                             box.read("name"),
                             style: const TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.bold),
+                                fontSize: 15, fontWeight: FontWeight.bold),
                           ),
                           Text(
                             box.read("username"),
                             style: const TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.bold),
+                                fontSize: 14, fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(
                             height: 8,
@@ -197,7 +221,13 @@ class _HomePageState extends State<HomePage> {
                           Text(
                             "Credit : ${box.read(StorageConstant.point) ?? 0.toString()}",
                             style: const TextStyle(
-                              fontSize: 16,
+                              fontSize: 14,
+                            ),
+                          ),
+                          Text(
+                            "${subscriptionDaysLeft()}",
+                            style: const TextStyle(
+                              fontSize: 14,
                             ),
                           ),
                         ],
@@ -245,273 +275,67 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
       ),
-      body: SizedBox.expand(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Card(
-            elevation: 8,
-            shadowColor: myPrimaryColor,
-            child: Column(
-              children: [
-                gapHeightM2,
-                Text(
-                  box.read(StorageConstant.name),
-                  style: TextStyle(
-                      fontSize: 30,
-                      color: myPrimaryColor,
-                      fontWeight: FontWeight.bold),
-                ),
-                SizedBox(
-                    width: 50,
-                    child: Divider(
-                      color: myPrimaryColor,
-                      thickness: 2,
-                    )),
-                Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      circleButton(
-                        name: "Book Now",
-                        startColor: const Color(0xFF75b6b2),
-                        endColor: const Color(0xFF3f618f),
-                        onTap: () {
-                          print(
-                              "Last order ::: ${box.read(StorageConstant.lastOrderDate)}");
-                          var difference = 0;
-                          var flag = true;
-                          if (box.read(StorageConstant.lastOrderDate) != null) {
-                            var inputFormat = DateFormat('dd-MM-yyyy');
-                            var orderDate = inputFormat
-                                .parse(box.read(StorageConstant.lastOrderDate));
+      body: SingleChildScrollView(
+        child: SizedBox(
+          width: Get.width,
+          height: Get.height,
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Card(
+              elevation: 8,
+              shadowColor: myPrimaryColor,
+              child: Column(
+                children: [
+                  gapHeightM2,
+                  Text(
+                    box.read(StorageConstant.name),
+                    style: TextStyle(
+                        fontSize: 30,
+                        color: myPrimaryColor,
+                        fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(
+                      width: 50,
+                      child: Divider(
+                        color: myPrimaryColor,
+                        thickness: 2,
+                      )),
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        circleButton(
+                          name: "Book Now",
+                          startColor: const Color(0xFF75b6b2),
+                          endColor: const Color(0xFF3f618f),
+                          onTap: () {
+                            print(
+                                "Next date ::: ${box.read(StorageConstant.next_date)}");
 
-                            final date2 = DateTime.now();
-                            difference = orderDate.difference(date2).inDays;
-                            print("Days diffance $difference");
-                            flag = false;
-                          }
-                          if (difference < -30 || flag) {
-                            Get.dialog(Dialog(
-                              clipBehavior: Clip.hardEdge,
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12)),
-                              child: Container(
-                                width: 250,
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Stack(
-                                      children: [
-                                        ClipPath(
-                                          clipper: LeftBottomClipper(),
-                                          child: Container(
-                                            height: 150,
-                                            color: myPrimaryColor,
-                                          ),
-                                        ),
-                                        Positioned(
-                                            top: 15,
-                                            right: 15,
-                                            child: Image.asset(
-                                              "assets/images/book_now.png",
-                                              width: 125,
-                                            )),
-                                      ],
-                                    ),
-                                    Text(
-                                      "Free Test",
-                                      style: TextStyle(
-                                          fontSize: 22,
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Text(
-                                        "Once you confirm your booking, a trained Phlebotomists (Sample Collector) will be assigned to visit you on your chosen time and pickup address and for collection of sample.",
-                                        textAlign: TextAlign.start,
-                                      ),
-                                    ),
-                                    gapHeightM2,
-                                    ElevatedButton(
-                                        onPressed: () {
-                                          Get.back();
-                                          Get.to(BookTestPage());
-                                        },
-                                        child: Text("Book Now")),
-                                    gapHeightM2,
-                                  ],
-                                ),
-                              ),
-                            ));
-                          } else {
-                            Get.defaultDialog(
-                                title: "Alert",
-                                middleText:
-                                    "You are already enrolled as our prestigious monthly member.\n\nUsers are allowed to book their tests once a month only.");
-                          }
-                        },
-                      ),
-                      circleButton(
-                        name: "Your Report",
-                        startColor: const Color(0xFFa0538b),
-                        endColor: const Color(0xFF634d8d),
-                        onTap: () {
-                          Get.dialog(Dialog(
-                            clipBehavior: Clip.hardEdge,
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12)),
-                            child: StatefulBuilder(
-                              builder: (context, setState) {
-                                return Container(
+                            var difference = 0;
+                            bool flag = !box.read(StorageConstant.userStatus);
+                            bool profileLock = flag;
+                            if (box.read(StorageConstant.next_date) != null) {
+                              var inputFormat = DateFormat('yyyy-MM-dd');
+                              var orderDate = inputFormat
+                                  .parse(box.read(StorageConstant.next_date));
+
+                              final date2 = DateTime.now();
+                              difference = orderDate.difference(date2).inDays;
+                              print("difference ${difference}");
+                            }
+                            if (flag && difference <= 0) {
+                              Get.dialog(Dialog(
+                                clipBehavior: Clip.hardEdge,
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12)),
+                                child: Container(
                                   width: 250,
                                   child: Column(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      SizedBox(
-                                        height: 150,
-                                        child: Stack(
-                                          children: [
-                                            Positioned(
-                                                top: 50,
-                                                child: Image.asset(
-                                                  "assets/images/calendar_group.png",
-                                                  fit: BoxFit.cover,
-                                                )),
-                                            ClipPath(
-                                              clipper: LeftBottomClipper(),
-                                              child: Container(
-                                                height: 150,
-                                                color: myPrimaryColor,
-                                              ),
-                                            ),
-                                            Positioned(
-                                                top: 15,
-                                                right: 15,
-                                                child: Image.asset(
-                                                  "assets/images/calendar.png",
-                                                  width: 125,
-                                                )),
-                                          ],
-                                        ),
-                                      ),
-                                      gapHeightM2,
-                                      Text("Please Select Date"),
-                                      gapHeightM2,
-                                      TextButton(
-                                        style: TextButton.styleFrom(
-                                            side: BorderSide(
-                                                width: 1,
-                                                color: Colors.black38)),
-                                        onPressed: () {
-                                          showMonthPicker(
-                                            context: context,
-                                            headerColor: myPrimaryColor,
-                                            initialDate: DateTime.now(),
-                                          ).then((date) {
-                                            if (date != null) {
-                                              setState(() {
-                                                selectedDate = date;
-                                              });
-                                            }
-                                          });
-                                        },
-                                        child: Container(
-                                          child: Text(
-                                            DateFormat("MMM yyyy")
-                                                .format(selectedDate),
-                                            style: TextStyle(fontSize: 25),
-                                          ),
-                                        ),
-                                      ),
-                                      gapHeightM2,
-                                      ElevatedButton(
-                                          onPressed: () {
-                                            DashboardService
-                                                    .fetchReportDetailFullByMonth(
-                                                        DateFormat("MM-yyyy")
-                                                            .format(
-                                                                selectedDate))
-                                                .then((value) {
-                                              if (value != null) {
-                                                Get.back();
-                                                if (value.status!) {
-                                                  if (value.orderDetail!
-                                                          .status! ==
-                                                      "completed") {
-                                                    if (value.orderDetail!
-                                                            .locked ==
-                                                        "0") {
-                                                      Get.to(ReportDetailPage(
-                                                        reportId: value
-                                                            .orderDetail!.id!,
-                                                      ));
-                                                    } else if (int.parse(
-                                                            box.read(
-                                                                StorageConstant
-                                                                    .point)) <
-                                                        30) {
-                                                      Get.to(InfoPage());
-                                                    } else {
-                                                      Get.to(ReportDetailPage(
-                                                        reportId: value
-                                                            .orderDetail!.id!,
-                                                      ));
-                                                    }
-                                                  } else if (value.orderDetail!
-                                                          .status! !=
-                                                      "completed") {
-                                                    Get.defaultDialog(
-                                                        title: "Alert",
-                                                        middleText:
-                                                            "You report is under process");
-                                                  }
-                                                } else {
-                                                  Get.defaultDialog(
-                                                      title: "Alert",
-                                                      middleText:
-                                                          "No Record Found");
-                                                }
-                                              } else {
-                                                Get.defaultDialog(
-                                                    title: "Alert",
-                                                    middleText:
-                                                        "No Record Found");
-                                              }
-                                            });
-                                          },
-                                          child: const Text("Continue")),
-                                      gapHeightM2,
-                                    ],
-                                  ),
-                                );
-                              },
-                            ),
-                          ));
-                        },
-                      ),
-                      circleButton(
-                        name: "Your Training",
-                        name2: "Program",
-                        startColor: const Color(0xFFffc49f),
-                        endColor: const Color(0xFFf679a1),
-                        onTap: () {
-                          if (box.read(StorageConstant.userStatus)) {
-                            Get.dialog(Dialog(
-                              clipBehavior: Clip.hardEdge,
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12)),
-                              child: Container(
-                                width: 250,
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    SizedBox(
-                                      height: 150,
-                                      child: Stack(
+                                      Stack(
                                         children: [
-                                          Positioned(
-                                              top: 50,
-                                              child: Text("Traning Program")),
                                           ClipPath(
                                             clipper: LeftBottomClipper(),
                                             child: Container(
@@ -522,318 +346,537 @@ class _HomePageState extends State<HomePage> {
                                           Positioned(
                                               top: 15,
                                               right: 15,
-                                              child: Card(
-                                                child: Image.asset(
-                                                  "assets/images/report.png",
-                                                  width: 100,
-                                                ),
-                                              )),
-                                          Positioned(
-                                              top: 45,
-                                              left: 15,
-                                              child: Text(
-                                                "Training Guide",
-                                                style: TextStyle(
-                                                    color: myWhite,
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 18),
+                                              child: Image.asset(
+                                                "assets/images/book_now.png",
+                                                width: 125,
                                               )),
                                         ],
                                       ),
-                                    ),
-                                    Column(
-                                      children: [
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceEvenly,
-                                          children: [
-                                            trainingItem("bmi.png", "BMI", () {
-                                              Get.to(BMIPage());
-                                            }),
-                                            trainingItem("water.png", "Water",
-                                                () {
-                                              Get.to(WaterPage());
-                                            }),
-                                          ],
+                                      Text(
+                                        "Free Test",
+                                        style: TextStyle(
+                                            fontSize: 22,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Text(
+                                          "Once you confirm your booking, a trained Phlebotomists (Sample Collector) will be assigned to visit you on your chosen time and pickup address and for collection of sample. ",
+                                          textAlign: TextAlign.start,
                                         ),
-                                        gapHeightM2,
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceEvenly,
-                                          children: [
-                                            trainingItem(
-                                                "footstep.png", "Kcal Burn",
-                                                () {
-                                              Get.to(StepCountPage());
-                                            }),
-                                            trainingItem("sleep.png", "Sleep",
-                                                () {
-                                              Get.to(SleepCountPage());
-                                            }),
-                                          ],
-                                        ),
-                                        gapHeightM2,
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceEvenly,
-                                          children: [
-                                            trainingItem(
-                                                "calories.png", "kcal Intake",
-                                                () {
-                                              Get.to(CalorieCountPage());
-                                            }),
-                                            trainingItem(
-                                                "nutrition.png", "Nutrition",
-                                                () {
-                                              Get.to(NutritionCountPage());
-                                            }),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                    gapHeightM2,
-                                  ],
+                                      ),
+                                      gapHeightM2,
+                                      ElevatedButton(
+                                          onPressed: () {
+                                            Get.back();
+                                            Get.to(BookTestPage());
+                                          },
+                                          child: Text("Book Now")),
+                                      gapHeightM2,
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            ));
-                          } else {
-                            DashboardService.fetchReportDetailFullByMonth(
-                                    DateFormat("MM-yyyy")
-                                        .format(DateTime.now()))
-                                .then((value) {
-                              if (value != null) {
-                                if (value.status!) {
-                                  if (value.orderDetail!.status! ==
-                                      "completed") {
-                                    if (int.parse(
-                                            box.read(StorageConstant.point)) >=
-                                        30) {
-                                      DashboardService.saveUpdatePoints(
-                                              30, false)
-                                          .then((value) {
-                                        box.write(
-                                            StorageConstant.point,
-                                            (int.parse(box.read(StorageConstant
-                                                        .point)) -
-                                                    30)
-                                                .toString());
-                                        box.write(
-                                            StorageConstant.userStatus, true);
-                                        setState(() {});
-                                        Get.dialog(Dialog(
-                                          clipBehavior: Clip.hardEdge,
-                                          shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(12)),
-                                          child: Container(
-                                            width: 250,
-                                            child: Column(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                SizedBox(
+                              ));
+                            } else {
+                              Get.defaultDialog(
+                                  title: "Alert",
+                                  middleText:
+                                      "You are already enrolled as our prestigious monthly member.\n\nUsers are allowed to book their tests once a month only.${profileLock ? "\ndays Left : ${difference >= 0 ? difference : '0'}" : ''}");
+                            }
+                          },
+                        ),
+                        circleButton(
+                          name: "Your Report",
+                          startColor: const Color(0xFFa0538b),
+                          endColor: const Color(0xFF634d8d),
+                          onTap: () {
+                            Get.dialog(Dialog(
+                              clipBehavior: Clip.hardEdge,
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12)),
+                              child: StatefulBuilder(
+                                builder: (context, setState) {
+                                  return Container(
+                                    width: 250,
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        SizedBox(
+                                          height: 150,
+                                          child: Stack(
+                                            children: [
+                                              Positioned(
+                                                  top: 50,
+                                                  child: Image.asset(
+                                                    "assets/images/calendar_group.png",
+                                                    fit: BoxFit.cover,
+                                                  )),
+                                              ClipPath(
+                                                clipper: LeftBottomClipper(),
+                                                child: Container(
                                                   height: 150,
-                                                  child: Stack(
-                                                    children: [
-                                                      Positioned(
-                                                          top: 50,
-                                                          child: Text(
-                                                              "Traning Program")),
-                                                      ClipPath(
-                                                        clipper:
-                                                            LeftBottomClipper(),
-                                                        child: Container(
-                                                          height: 150,
-                                                          color: myPrimaryColor,
-                                                        ),
-                                                      ),
-                                                      Positioned(
-                                                          top: 15,
-                                                          right: 15,
-                                                          child: Card(
-                                                            child: Image.asset(
-                                                              "assets/images/report.png",
-                                                              width: 100,
-                                                            ),
-                                                          )),
-                                                    ],
-                                                  ),
+                                                  color: myPrimaryColor,
                                                 ),
-                                                Column(
-                                                  children: [
-                                                    Row(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .spaceEvenly,
-                                                      children: [
-                                                        trainingItem(
-                                                            "bmi.png", "BMI",
-                                                            () {
-                                                          Get.back();
-                                                          Get.to(BMIPage());
-                                                        }),
-                                                        trainingItem(
-                                                            "water.png",
-                                                            "Water", () {
-                                                          Get.back();
-                                                          Get.to(WaterPage());
-                                                        }),
-                                                      ],
-                                                    ),
-                                                    gapHeightM2,
-                                                    Row(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .spaceEvenly,
-                                                      children: [
-                                                        trainingItem(
-                                                            "footstep.png",
-                                                            "Step", () {
-                                                          Get.back();
-                                                          Get.to(
-                                                              StepCountPage());
-                                                        }),
-                                                        trainingItem(
-                                                            "sleep.png",
-                                                            "Sleep", () {
-                                                          Get.back();
-                                                          Get.to(
-                                                              SleepCountPage());
-                                                        }),
-                                                      ],
-                                                    ),
-                                                    gapHeightM2,
-                                                    Row(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .spaceEvenly,
-                                                      children: [
-                                                        trainingItem(
-                                                            "calories.png",
-                                                            "kcal Intake", () {
-                                                          Get.back();
-                                                          Get.to(
-                                                              CalorieCountPage());
-                                                        }),
-                                                        trainingItem(
-                                                            "nutrition.png",
-                                                            "Nutrition", () {
-                                                          Get.back();
-                                                          Get.to(
-                                                              NutritionCountPage());
-                                                        }),
-                                                      ],
-                                                    ),
-                                                  ],
-                                                ),
-                                                gapHeightM2,
-                                              ],
+                                              ),
+                                              Positioned(
+                                                  top: 15,
+                                                  right: 15,
+                                                  child: Image.asset(
+                                                    "assets/images/calendar.png",
+                                                    width: 125,
+                                                  )),
+                                            ],
+                                          ),
+                                        ),
+                                        gapHeightM2,
+                                        Text("Please Select Date"),
+                                        gapHeightM2,
+                                        TextButton(
+                                          style: TextButton.styleFrom(
+                                              side: BorderSide(
+                                                  width: 1,
+                                                  color: Colors.black38)),
+                                          onPressed: () {
+                                            showMonthPicker(
+                                              context: context,
+                                              headerColor: myPrimaryColor,
+                                              initialDate: DateTime.now(),
+                                            ).then((date) {
+                                              if (date != null) {
+                                                setState(() {
+                                                  selectedDate = date;
+                                                });
+                                              }
+                                            });
+                                          },
+                                          child: Container(
+                                            child: Text(
+                                              DateFormat("MMM yyyy")
+                                                  .format(selectedDate),
+                                              style: TextStyle(fontSize: 25),
                                             ),
                                           ),
-                                        ));
-                                      });
-                                    } else {
+                                        ),
+                                        gapHeightM2,
+                                        ElevatedButton(
+                                            onPressed: () {
+                                              DashboardService
+                                                      .fetchReportDetailFullByMonth(
+                                                          DateFormat("MM-yyyy")
+                                                              .format(
+                                                                  selectedDate))
+                                                  .then((value) {
+                                                if (value != null) {
+                                                  Get.back();
+                                                  if (value.status!) {
+                                                    if (value.orderDetail!
+                                                            .status! ==
+                                                        "completed") {
+                                                      if (value.orderDetail!
+                                                              .locked ==
+                                                          "0") {
+                                                        Get.to(ReportDetailPage(
+                                                          reportId: value
+                                                              .orderDetail!.id!,
+                                                        ));
+                                                      } else if (int.parse(
+                                                              box.read(
+                                                                  StorageConstant
+                                                                      .point)) <
+                                                          30) {
+                                                        Get.to(InfoPage());
+                                                      } else {
+                                                        Get.to(ReportDetailPage(
+                                                          reportId: value
+                                                              .orderDetail!.id!,
+                                                        ));
+                                                      }
+                                                    } else if (value
+                                                            .orderDetail!
+                                                            .status! !=
+                                                        "completed") {
+                                                      Get.defaultDialog(
+                                                          title: "Alert",
+                                                          middleText:
+                                                              "You report is under process");
+                                                    }
+                                                  } else {
+                                                    Get.defaultDialog(
+                                                        title: "Alert",
+                                                        middleText:
+                                                            "No Record Found");
+                                                  }
+                                                } else {
+                                                  Get.defaultDialog(
+                                                      title: "Alert",
+                                                      middleText:
+                                                          "No Record Found");
+                                                }
+                                              });
+                                            },
+                                            child: const Text("Continue")),
+                                        gapHeightM2,
+                                      ],
+                                    ),
+                                  );
+                                },
+                              ),
+                            ));
+                          },
+                        ),
+                        circleButton(
+                          name: "Your Training",
+                          name2: "Program",
+                          startColor: const Color(0xFFffc49f),
+                          endColor: const Color(0xFFf679a1),
+                          onTap: () {
+                            if (box.read(StorageConstant.userStatus)) {
+                              Get.dialog(Dialog(
+                                clipBehavior: Clip.hardEdge,
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12)),
+                                child: Container(
+                                  width: 250,
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      SizedBox(
+                                        height: 150,
+                                        child: Stack(
+                                          children: [
+                                            Positioned(
+                                                top: 50,
+                                                child: Text("Traning Program")),
+                                            ClipPath(
+                                              clipper: LeftBottomClipper(),
+                                              child: Container(
+                                                height: 150,
+                                                color: myPrimaryColor,
+                                              ),
+                                            ),
+                                            Positioned(
+                                                top: 15,
+                                                right: 15,
+                                                child: Card(
+                                                  child: Image.asset(
+                                                    "assets/images/report.png",
+                                                    width: 100,
+                                                  ),
+                                                )),
+                                            Positioned(
+                                                top: 45,
+                                                left: 15,
+                                                child: Text(
+                                                  "Training Guide",
+                                                  style: TextStyle(
+                                                      color: myWhite,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      fontSize: 18),
+                                                )),
+                                          ],
+                                        ),
+                                      ),
+                                      Column(
+                                        children: [
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceEvenly,
+                                            children: [
+                                              trainingItem("bmi.png", "BMI",
+                                                  () {
+                                                Get.to(BMIPage());
+                                              }),
+                                              trainingItem("water.png", "Water",
+                                                  () {
+                                                Get.to(WaterPage());
+                                              }),
+                                            ],
+                                          ),
+                                          gapHeightM2,
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceEvenly,
+                                            children: [
+                                              trainingItem(
+                                                  "nutrition.png", "Nutrition",
+                                                  () {
+                                                Get.to(NutritionCountPage());
+                                              }),
+                                              trainingItem("sleep.png", "Sleep",
+                                                  () {
+                                                Get.to(SleepCountPage());
+                                              }),
+                                            ],
+                                          ),
+                                          gapHeightM2,
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceEvenly,
+                                            children: [
+                                              trainingItem(
+                                                  "calories.png", "kcal Intake",
+                                                  () {
+                                                Get.to(CalorieCountPage());
+                                              }),
+                                              trainingItem(
+                                                  "footstep.png", "Kcal Burn",
+                                                  () {
+                                                Get.to(StepCountPage());
+                                              }),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                      gapHeightM2,
+                                    ],
+                                  ),
+                                ),
+                              ));
+                            } else {
+                              DashboardService.fetchReportDetailFullByMonth(
+                                      DateFormat("MM-yyyy")
+                                          .format(DateTime.now()))
+                                  .then((value) {
+                                if (value != null) {
+                                  if (value.status!) {
+                                    if (value.orderDetail!.status! ==
+                                        "completed") {
+                                      if (int.parse(box
+                                              .read(StorageConstant.point)) >=
+                                          30) {
+                                        DashboardService.saveUpdatePoints(
+                                                30, false)
+                                            .then((value) {
+                                          box.write(
+                                              StorageConstant.point,
+                                              (int.parse(box.read(
+                                                          StorageConstant
+                                                              .point)) -
+                                                      30)
+                                                  .toString());
+                                          box.write(
+                                              StorageConstant.userStatus, true);
+                                          setState(() {});
+                                          Get.dialog(Dialog(
+                                            clipBehavior: Clip.hardEdge,
+                                            shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(12)),
+                                            child: Container(
+                                              width: 250,
+                                              child: Column(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  SizedBox(
+                                                    height: 150,
+                                                    child: Stack(
+                                                      children: [
+                                                        Positioned(
+                                                            top: 50,
+                                                            child: Text(
+                                                                "Traning Program")),
+                                                        ClipPath(
+                                                          clipper:
+                                                              LeftBottomClipper(),
+                                                          child: Container(
+                                                            height: 150,
+                                                            color:
+                                                                myPrimaryColor,
+                                                          ),
+                                                        ),
+                                                        Positioned(
+                                                            top: 15,
+                                                            right: 15,
+                                                            child: Card(
+                                                              child:
+                                                                  Image.asset(
+                                                                "assets/images/report.png",
+                                                                width: 100,
+                                                              ),
+                                                            )),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                  Column(
+                                                    children: [
+                                                      Row(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .spaceEvenly,
+                                                        children: [
+                                                          trainingItem(
+                                                              "bmi.png", "BMI",
+                                                              () {
+                                                            Get.back();
+                                                            Get.to(BMIPage());
+                                                          }),
+                                                          trainingItem(
+                                                              "water.png",
+                                                              "Water", () {
+                                                            Get.back();
+                                                            Get.to(WaterPage());
+                                                          }),
+                                                        ],
+                                                      ),
+                                                      gapHeightM2,
+                                                      Row(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .spaceEvenly,
+                                                        children: [
+                                                          trainingItem(
+                                                              "nutrition.png",
+                                                              "Nutrition", () {
+                                                            Get.back();
+                                                            Get.to(
+                                                                NutritionCountPage());
+                                                          }),
+                                                          trainingItem(
+                                                              "sleep.png",
+                                                              "Sleep", () {
+                                                            Get.back();
+                                                            Get.to(
+                                                                SleepCountPage());
+                                                          }),
+                                                        ],
+                                                      ),
+                                                      gapHeightM2,
+                                                      Row(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .spaceEvenly,
+                                                        children: [
+                                                          trainingItem(
+                                                              "calories.png",
+                                                              "kcal Intake",
+                                                              () {
+                                                            Get.back();
+                                                            Get.to(
+                                                                CalorieCountPage());
+                                                          }),
+                                                          trainingItem(
+                                                              "footstep.png",
+                                                              "Step", () {
+                                                            Get.back();
+                                                            Get.to(
+                                                                StepCountPage());
+                                                          }),
+                                                        ],
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  gapHeightM2,
+                                                ],
+                                              ),
+                                            ),
+                                          ));
+                                        });
+                                      } else {
+                                        Get.to(InfoPage());
+                                      }
+                                    } else if (value.orderDetail!.status! !=
+                                        "completed") {
                                       Get.to(InfoPage());
                                     }
-                                  } else if (value.orderDetail!.status! !=
-                                      "completed") {
-                                    Get.to(InfoPage());
+                                  } else {
+                                    Get.defaultDialog(
+                                        title: "Alert",
+                                        middleText: "Please Book your Test");
                                   }
                                 } else {
                                   Get.defaultDialog(
                                       title: "Alert",
                                       middleText: "Please Book your Test");
                                 }
+                              });
+                            }
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text("Refer"),
+                      IconButton(
+                        onPressed: () {
+                          try {
+                            Share.shareWithResult("Share Link").then((value) {
+                              DashboardService.saveUpdatePoints(10, true);
+                              box.write(
+                                  StorageConstant.point,
+                                  (int.parse(box.read(StorageConstant.point)) +
+                                          10)
+                                      .toString());
+                              setState(() {});
+                            });
+                          } catch (e) {}
+                        },
+                        icon: const Icon(
+                          FontAwesomeIcons.share,
+                          color: Colors.green,
+                          size: 28,
+                        ),
+                      ),
+                    ],
+                  ),
+                  ElevatedButton(
+                      onPressed: () {
+                        if (box.read(StorageConstant.userStatus)) {
+                          Get.to(DashboardPage());
+                        } else {
+                          DashboardService.fetchReportDetailFullByMonth(
+                                  DateFormat("MM-yyyy").format(DateTime.now()))
+                              .then((value) {
+                            if (value != null) {
+                              if (value.status!) {
+                                print("Dasboard ${value.orderDetail!.status!}");
+                                if (value.orderDetail!.status! == "completed") {
+                                  if (int.parse(
+                                          box.read(StorageConstant.point)) >=
+                                      30) {
+                                    DashboardService.saveUpdatePoints(30, false)
+                                        .then((value) {
+                                      box.write(
+                                          StorageConstant.point,
+                                          (int.parse(box.read(
+                                                      StorageConstant.point)) -
+                                                  30)
+                                              .toString());
+                                      box.write(
+                                          StorageConstant.userStatus, true);
+                                      setState(() {});
+                                      Get.to(DashboardPage());
+                                    });
+                                  } else {
+                                    print("Else First");
+                                    Get.to(InfoPage());
+                                  }
+                                } else if (value.orderDetail!.status! !=
+                                    "completed") {
+                                  print("Else First");
+                                  Get.to(InfoPage());
+                                }
                               } else {
                                 Get.defaultDialog(
                                     title: "Alert",
                                     middleText: "Please Book your Test");
-                              }
-                            });
-                          }
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text("Refer"),
-                    IconButton(
-                      onPressed: () {
-                        try {
-                          Share.shareWithResult("Share Link").then((value) {
-                            DashboardService.saveUpdatePoints(10, true);
-                            box.write(
-                                StorageConstant.point,
-                                (int.parse(box.read(StorageConstant.point)) +
-                                        10)
-                                    .toString());
-                            setState(() {});
-                          });
-                        } catch (e) {}
-                      },
-                      icon: const Icon(
-                        FontAwesomeIcons.share,
-                        color: Colors.green,
-                        size: 28,
-                      ),
-                    ),
-                  ],
-                ),
-                ElevatedButton(
-                    onPressed: () {
-                      if (box.read(StorageConstant.userStatus)) {
-                        Get.to(DashboardPage());
-                      } else {
-                        DashboardService.fetchReportDetailFullByMonth(
-                                DateFormat("MM-yyyy").format(DateTime.now()))
-                            .then((value) {
-                          if (value != null) {
-                            if (value.status!) {
-                              print("Dasboard ${value.orderDetail!.status!}");
-                              if (value.orderDetail!.status! == "completed") {
-                                if (int.parse(
-                                        box.read(StorageConstant.point)) >=
-                                    30) {
-                                  DashboardService.saveUpdatePoints(30, false)
-                                      .then((value) {
-                                    box.write(
-                                        StorageConstant.point,
-                                        (int.parse(box.read(
-                                                    StorageConstant.point)) -
-                                                30)
-                                            .toString());
-                                    box.write(StorageConstant.userStatus, true);
-                                    setState(() {});
-                                    Get.to(DashboardPage());
-                                  });
-                                } else {
-                                  print("Else First");
-                                  Get.to(InfoPage());
-                                }
-                              } else if (value.orderDetail!.status! !=
-                                  "completed") {
-                                print("Else First");
-                                Get.to(InfoPage());
                               }
                             } else {
                               Get.defaultDialog(
                                   title: "Alert",
                                   middleText: "Please Book your Test");
                             }
-                          } else {
-                            Get.defaultDialog(
-                                title: "Alert",
-                                middleText: "Please Book your Test");
-                          }
-                        });
-                      }
-                    },
-                    child: Text("Dashboard")),
-                gapHeightL2,
-                gapHeightM2,
-              ],
+                          });
+                        }
+                      },
+                      child: Text("Dashboard")),
+                  gapHeightL2,
+                  gapHeightM2,
+                ],
+              ),
             ),
           ),
         ),

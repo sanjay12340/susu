@@ -89,7 +89,7 @@ class Util {
     }
   }
 
-static  String sleepByAge() {
+  static String sleepByAge() {
     int age = myAge();
     if (age >= 6 && age <= 12) {
       return "9-12";
@@ -106,4 +106,25 @@ static  String sleepByAge() {
     }
   }
 
+  static void storeValueOfUser(Map<String, dynamic> user) {
+    var box = GetStorage();
+    box.write(StorageConstant.id, user['id']);
+    box.write(StorageConstant.isLoggedIn, true);
+    box.write(StorageConstant.username, user['username']);
+    box.write(StorageConstant.name, user['name']);
+    box.write(StorageConstant.dob, user['dob']);
+    box.write(StorageConstant.email, user['email']);
+    box.write(StorageConstant.user_type, user['user_type']);
+    box.write(StorageConstant.gender, user['sex']);
+    box.write(StorageConstant.height, user['height']);
+    box.write(StorageConstant.weight, user['weight']);
+    box.write(StorageConstant.point, user['point']);
+    box.write(StorageConstant.profile_lock,
+        user['profile_lock'] != null ? user['profile_lock'] == "1" : true);
+    box.write(StorageConstant.new_order_lock,
+        user['new_order_lock'] != null ? user['new_order_lock'] == "1" : true);
+    box.write(StorageConstant.next_date, user['next_date']);
+    box.write(StorageConstant.lastOrderDate, user['last_order_date']);
+    box.write(StorageConstant.userStatus, user['user_status'] == "1");
+  }
 }

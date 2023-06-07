@@ -202,6 +202,7 @@ class _LabSubmitTestResultState extends State<LabSubmitTestResult> {
                                   name: e.name,
                                   index: index,
                                   dimension: e.alise!,
+                                  fanme: e.fname,
                                 );
                                 f.controller.text = e.value!;
                                 listController.add(f);
@@ -217,6 +218,7 @@ class _LabSubmitTestResultState extends State<LabSubmitTestResult> {
                                   name: e.name,
                                   index: index,
                                   dimension: e.alise!,
+                                  fanme: e.fname,
                                 );
 
                                 listController.add(f);
@@ -252,8 +254,10 @@ class FormTextField extends StatelessWidget {
     this.name,
     required this.index,
     required this.dimension,
+    this.fanme,
   });
   final String? name;
+  final String? fanme;
   final int index;
   final String dimension;
   TextEditingController controller = TextEditingController();
@@ -274,7 +278,7 @@ class FormTextField extends StatelessWidget {
               decoration: InputDecoration(
                   contentPadding:
                       EdgeInsets.symmetric(vertical: 2, horizontal: 20),
-                  hintText: name,
+                  hintText: fanme ?? name,
                   labelText: name,
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(20))),

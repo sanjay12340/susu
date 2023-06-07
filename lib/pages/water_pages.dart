@@ -105,7 +105,7 @@ class _WaterPageState extends State<WaterPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Water"),
+        title: const Text("Water Intake"),
       ),
       backgroundColor: Color(0xFFF5F5F5),
       body: SingleChildScrollView(
@@ -124,7 +124,7 @@ class _WaterPageState extends State<WaterPage> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: const [
                         Text(
-                          "Drink Water",
+                          "Add Water",
                           style: TextStyle(
                               fontSize: 18, fontWeight: FontWeight.bold),
                         )
@@ -137,39 +137,9 @@ class _WaterPageState extends State<WaterPage> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         _getFourthProgressBar(),
-                        IconButton(
-                            onPressed: () {
-                              setState(() {
-                                int f = todayGlassTaken + 1;
-                                todayGlassTakenFull = f;
-                                DashboardService.saveWaterIntake(
-                                    glass: 1,
-                                    userId: box.read(StorageConstant.id));
-                                // if (maxGlass <= f) {
-                                //   print("maxStep $f");
-                                //   f = maxGlass;
-                                // }
-                                if (f <= 0) {
-                                  f = 0;
-                                }
-                                todayGlassTaken = f;
-                                double per = (todayGlassTaken * 100) / maxGlass;
-                                if (per <= 100) {
-                                  _value = per;
-                                } else {
-                                  _value = 100;
-                                }
-                                if (per <= 0) {
-                                  _value = 0;
-                                }
-                              });
-                            },
-                            icon: Icon(Icons.add_circle_outlined)),
                       ],
                     ),
-                    SizedBox(
-                      height: 10,
-                    ),
+                    gapHeightM2,
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -180,6 +150,60 @@ class _WaterPageState extends State<WaterPage> {
                         )
                       ],
                     ),
+                    if (_value >= 100)
+                      SizedBox(
+                        width: double.infinity,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            gapHeightM2,
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.thumb_up,
+                                    color: Colors.amber.shade600),
+                                gapWidthM2,
+                                const Text("Goal Completed")
+                              ],
+                            )
+                          ],
+                        ),
+                      ),
+                    gapHeightM2,
+                    ElevatedButton(
+                        onPressed: () {
+                          setState(() {
+                            int f = todayGlassTaken + 1;
+                            todayGlassTakenFull = f;
+                            DashboardService.saveWaterIntake(
+                                glass: 1, userId: box.read(StorageConstant.id));
+                            // if (maxGlass <= f) {
+                            //   print("maxStep $f");
+                            //   f = maxGlass;
+                            // }
+                            if (f <= 0) {
+                              f = 0;
+                            }
+                            todayGlassTaken = f;
+                            double per = (todayGlassTaken * 100) / maxGlass;
+                            if (per <= 100) {
+                              _value = per;
+                            } else {
+                              _value = 100;
+                            }
+                            if (per <= 0) {
+                              _value = 0;
+                            }
+                          });
+                        },
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.add_circle_outlined),
+                            gapWidthS,
+                            Text("1 Up")
+                          ],
+                        )),
                     Divider(
                       thickness: 1,
                     ),
@@ -269,7 +293,7 @@ class _WaterPageState extends State<WaterPage> {
                               Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: Text(
-                                  "Daily Water intake",
+                                  "Daily Water Intake",
                                   style: TextStyle(fontWeight: FontWeight.w700),
                                 ),
                               )

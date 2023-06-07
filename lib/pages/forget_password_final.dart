@@ -1,4 +1,6 @@
 import 'package:susu/pages/Login.dart';
+import 'package:susu/pages/home_page_old.dart';
+import 'package:susu/services/dashboard_service.dart';
 import 'package:susu/services/game_result_service.dart';
 import 'package:susu/services/genral_api_call.dart';
 import 'package:susu/utils/mycontant.dart';
@@ -6,8 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class ForgetPasswordFinal extends StatefulWidget {
-  final String? phone;
-  ForgetPasswordFinal({Key? key, this.phone}) : super(key: key);
+  final String? email;
+  ForgetPasswordFinal({Key? key, this.email}) : super(key: key);
 
   @override
   _ForgetPasswordFinalState createState() => _ForgetPasswordFinalState();
@@ -82,7 +84,7 @@ class _ForgetPasswordFinalState extends State<ForgetPasswordFinal> {
                         padding:
                             EdgeInsets.symmetric(vertical: 14, horizontal: 15),
                         decoration: BoxDecoration(color: myPrimaryColorDark),
-                        child: Text("${widget.phone}",
+                        child: Text("${widget.email}",
                             style: TextStyle(color: myWhite, fontSize: 20)),
                       ),
                       SizedBox(
@@ -156,40 +158,41 @@ class _ForgetPasswordFinalState extends State<ForgetPasswordFinal> {
                                       middleText: "Please Wait...",
                                       barrierDismissible: false,
                                     );
-                                    genralApiCallService.fetchGenralQueryNormal(
-                                        ''' UPDATE `user` SET `password` = '${_password.text}' WHERE `phone`='${widget.phone}' ''',
-                                        "s",
-                                        "f").then((value) {
-                                      if (value == 's') {
-                                        Get.back();
-                                        Get.defaultDialog(
-                                            title: "congratulations",
-                                            middleText:
-                                                "Your Password is updated",
-                                            barrierDismissible: false,
-                                            actions: [
-                                              TextButton(
-                                                  onPressed: () {
-                                                    Get.offAll(
-                                                        () => LoginPage());
-                                                  },
-                                                  child: Text("Ok"))
-                                            ]);
-                                      } else {
-                                        Get.back();
-                                        Get.defaultDialog(
-                                            title: "Opps",
-                                            middleText:
-                                                "Your Password is updated try again or  Contact To Admin",
-                                            barrierDismissible: false,
-                                            actions: [
-                                              TextButton(
-                                                  onPressed: () {
-                                                    Get.offAll(
-                                                        () => LoginPage());
-                                                  },
-                                                  child: Text("Ok"))
-                                            ]);
+                                    DashboardService.updatePassword(
+                                            widget.email!, '', _password.text)
+                                        .then((value) {
+                                      if (value != null) {
+                                        if (value['status']) {
+                                          Get.back();
+                                          Get.defaultDialog(
+                                              title: "congratulations",
+                                              middleText:
+                                                  "Your Password is updated",
+                                              barrierDismissible: false,
+                                              actions: [
+                                                TextButton(
+                                                    onPressed: () {
+                                                      Get.offAll(
+                                                          () => LoginPage());
+                                                    },
+                                                    child: Text("Ok"))
+                                              ]);
+                                        } else {
+                                          Get.back();
+                                          Get.defaultDialog(
+                                              title: "Opps",
+                                              middleText: value['msg'] ??
+                                                  "Something went wrong",
+                                              barrierDismissible: false,
+                                              actions: [
+                                                TextButton(
+                                                    onPressed: () {
+                                                      Get.offAll(
+                                                          () => LoginPage());
+                                                    },
+                                                    child: Text("Ok"))
+                                              ]);
+                                        }
                                       }
                                     });
                                   } else {

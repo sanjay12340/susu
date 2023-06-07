@@ -7,6 +7,8 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/services.dart';
 import 'package:susu/pages/Login.dart';
+import 'package:susu/pages/privacy_policy.dart';
+import 'package:susu/pages/terms_and_conditions.dart';
 import 'package:susu/services/dashboard_service.dart';
 import 'package:susu/services/game_result_service.dart';
 import 'package:susu/services/genral_api_call.dart';
@@ -17,6 +19,7 @@ import 'package:get_storage/get_storage.dart';
 
 import '../models/register_user_model.dart';
 import '../utils/storage_constant.dart';
+import '../utils/util.dart';
 import 'home_page.dart';
 import 'package:intl/intl.dart';
 
@@ -39,7 +42,7 @@ class _SignUPFinalPageState extends State<SignUPFinalPage> {
   final TextEditingController _ref = TextEditingController();
   final TextEditingController _phone = TextEditingController();
   final RemoteGameResultService logincheck = RemoteGameResultService();
-  String _age = "age";
+  String _age = "Age";
   String _selectedSex = "select";
   String errorSex = "";
   String errorAge = "";
@@ -418,10 +421,38 @@ class _SignUPFinalPageState extends State<SignUPFinalPage> {
                             padding: const EdgeInsets.symmetric(
                                 vertical: myHeightLarge),
                             child: Text(
-                              "By Logging in  or signing up. you agree to the policy",
+                              "By Signing up, you agree to our",
                               style: Get.theme.textTheme.bodySmall!,
                             ),
                           ),
+                          gapHeightS,
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              GestureDetector(
+                                onTap: () {
+                                  Get.to(PrivacyPolicyPage());
+                                },
+                                child: const Text(
+                                  'Privacy Policy ',
+                                  style: TextStyle(
+                                      fontSize: 14, color: Colors.blue),
+                                ),
+                              ),
+                              Text(" & "),
+                              GestureDetector(
+                                onTap: () {
+                                  Get.to(TermsAndConditionsScreen());
+                                },
+                                child: const Text(
+                                  ' Terms and conditions',
+                                  style: TextStyle(
+                                      fontSize: 14, color: Colors.blue),
+                                ),
+                              ),
+                            ],
+                          ),
+                          gapHeightM2,
                           SizedBox(
                             width: Get.width,
                             child: ElevatedButton(
@@ -490,40 +521,24 @@ class _SignUPFinalPageState extends State<SignUPFinalPage> {
                                       } else {
                                         if (value['status']) {
                                           print(value['user']);
+                                          if (value['user'] != null) {
+                                            Map<String, dynamic> user =
+                                                value['user'];
+                                            Util.storeValueOfUser(user);
 
-                                          Map<String, dynamic> user =
-                                              value['user'];
-                                          box.write(
-                                              StorageConstant.id, user['id']);
-                                          box.write(StorageConstant.username,
-                                              user['username']);
-                                          box.write(StorageConstant.name,
-                                              user['name']);
-                                          box.write(
-                                              StorageConstant.dob, user['dob']);
-                                          box.write(StorageConstant.email,
-                                              user['email']);
-                                          box.write(StorageConstant.user_type,
-                                              user['user_type']);
-                                          box.write(StorageConstant.user_type,
-                                              user['user_type']);
-                                          box.write(StorageConstant.gender,
-                                              user['sex']);
-                                          box.write(StorageConstant.height,
-                                              user['height']);
-                                          box.write(StorageConstant.weight,
-                                              user['weight']);
-                                          box.write(StorageConstant.point,
-                                              user['point']);
-                                          box.write(StorageConstant.userStatus,
-                                              user['user_status'] == "1");
-                                          Get.defaultDialog(
-                                            title: "Alert",
-                                            content: Text("Account Created"),
-                                            onConfirm: () {
-                                              Get.to(HomePage());
-                                            },
-                                          );
+                                            Get.defaultDialog(
+                                              title: "Alert",
+                                              content: Text("Account Created"),
+                                              onConfirm: () {
+                                                Get.to(HomePage());
+                                              },
+                                            );
+                                          } else {
+                                            Get.defaultDialog(
+                                                title: "Alert",
+                                                content: Text(
+                                                    "Something went wrong ${value['msg'] ?? ""}"));
+                                          }
                                         } else {
                                           Get.defaultDialog(
                                               title: "Alert",

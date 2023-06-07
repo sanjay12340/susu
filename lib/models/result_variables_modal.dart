@@ -16,6 +16,7 @@ class ResultVariablesModal {
     this.id,
     this.name,
     this.star,
+    this.fname,
     this.end,
     this.alise,
     this.dimention,
@@ -25,6 +26,7 @@ class ResultVariablesModal {
   final String? name;
   final String? star;
   final String? end;
+  final String? fname;
   final String? alise;
   final String? dimention;
 
@@ -34,6 +36,7 @@ class ResultVariablesModal {
         name: json["name"],
         star: json["star"],
         end: json["end"],
+        fname: json["fname"],
         alise: json["alise"],
         dimention: json["dimention"],
       );

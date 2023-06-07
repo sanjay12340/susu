@@ -30,6 +30,7 @@ class _LabHomePageState extends State<LabHomePage> {
   var orderByOrder = "";
   var orderByName = "";
   var orderByStatus = "";
+  var orderByDate = "";
 
   @override
   void initState() {
@@ -58,6 +59,7 @@ class _LabHomePageState extends State<LabHomePage> {
       }
       orderByName = "";
       orderByStatus = "";
+      orderByDate = "";
     }
     if (name == "orderByName") {
       if (orderByName.isEmpty) {
@@ -77,6 +79,7 @@ class _LabHomePageState extends State<LabHomePage> {
       }
       orderByOrder = "";
       orderByStatus = "";
+      orderByDate = "";
     }
     if (name == "orderByStatus") {
       if (orderByStatus.isEmpty) {
@@ -95,7 +98,28 @@ class _LabHomePageState extends State<LabHomePage> {
         }
       }
       orderByOrder = "";
+      orderByDate = "";
       orderByName = "";
+    }
+    if (name == "orderByDate") {
+      if (orderByDate.isEmpty) {
+        orderByDate = "up";
+        testDataModal.value.orderList!
+            .sort((a, b) => a.createdOn!.compareTo(b.createdOn!));
+      } else {
+        if (orderByDate == "up") {
+          orderByDate = "down";
+          testDataModal.value.orderList!
+              .sort((a, b) => b.createdOn!.compareTo(a.createdOn!));
+        } else {
+          orderByDate = "up";
+          testDataModal.value.orderList!
+              .sort((a, b) => a.createdOn!.compareTo(b.createdOn!));
+        }
+      }
+      orderByOrder = "";
+      orderByName = "";
+      orderByStatus = "";
     }
     setState(() {});
   }
@@ -369,9 +393,37 @@ class _LabHomePageState extends State<LabHomePage> {
                                     ),
                                   )),
                                   TableCell(
-                                      verticalAlignment:
-                                          TableCellVerticalAlignment.middle,
-                                      child: Center(child: Text("Date"))),
+                                      child: GestureDetector(
+                                    onTap: () {
+                                      recordOrderBy("orderByDate");
+                                    },
+                                    child: Center(
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 10),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Text(
+                                              "Date",
+                                              style: TextStyle(fontSize: 12),
+                                            ),
+                                            orderByDate.isNotEmpty
+                                                ? Icon(
+                                                    orderByDate == "up"
+                                                        ? Icons
+                                                            .keyboard_arrow_down_outlined
+                                                        : Icons
+                                                            .keyboard_arrow_up_outlined,
+                                                    size: 14,
+                                                  )
+                                                : const SizedBox.shrink()
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  )),
                                   TableCell(
                                       verticalAlignment:
                                           TableCellVerticalAlignment.middle,

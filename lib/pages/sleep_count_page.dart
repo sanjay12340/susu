@@ -88,6 +88,8 @@ class _SleepCountPageState extends State<SleepCountPage> {
               String formatedDate = dateFormat.format(date);
               Today? t = history.firstWhereOrNull((element) =>
                   formatedDate == dateFormat.format(element.date!));
+              Today? t2 = history.firstWhereOrNull((element) =>
+                  formatedDate == dateFormat.format(element.createdAt!));
 
               if (i == 1) {
                 print("first date ${formatedDate}");
@@ -313,7 +315,7 @@ class _SleepCountPageState extends State<SleepCountPage> {
                     style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 17,
-                        color: Colors.black54),
+                        color: Colors.black),
                   ),
                   Divider(
                     thickness: 2,
@@ -416,31 +418,6 @@ class _SleepCountPageState extends State<SleepCountPage> {
               ),
             ),
           ),
-          SizedBox(
-            height: 10,
-          ),
-          Card(
-            elevation: 0,
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Sleep History",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  Container(
-                      width: Get.width - 10,
-                      height: 300,
-                      child: charts.BarChart(
-                        createSampleModel(),
-                        animate: true,
-                      )),
-                ],
-              ),
-            ),
-          )
         ]),
       ),
     );
@@ -514,42 +491,6 @@ class _SleepCountPageState extends State<SleepCountPage> {
           height: 10,
         ),
       ]),
-    );
-  }
-
-  Widget _getThirdProgressBar() {
-    return Center(
-      child: SizedBox(
-        height: _size,
-        width: _size,
-        child: SfRadialGauge(axes: <RadialAxis>[
-          RadialAxis(
-              showLabels: false,
-              showTicks: false,
-              startAngle: 270,
-              endAngle: 270,
-              radiusFactor: 0.8,
-              axisLineStyle: const AxisLineStyle(
-                thickness: 0.05,
-                color: Color.fromARGB(30, 0, 169, 181),
-                thicknessUnit: GaugeSizeUnit.factor,
-              ),
-              pointers: <GaugePointer>[
-                RangePointer(
-                    value: _value,
-                    width: 0.05,
-                    sizeUnit: GaugeSizeUnit.factor,
-                    enableAnimation: true,
-                    animationDuration: 20,
-                    animationType: AnimationType.linear)
-              ],
-              annotations: <GaugeAnnotation>[
-                GaugeAnnotation(
-                    positionFactor: 0.05,
-                    widget: completed ? _downloadImage : _pauseImage)
-              ])
-        ]),
-      ),
     );
   }
 }

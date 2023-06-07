@@ -25,10 +25,10 @@ class _NutritionCountPageState extends State<NutritionCountPage> {
   var box = GetStorage();
   List<Map<String, dynamic>> vegActions = [
     {
-      "name": "dale",
+      "name": "Dale",
       "status": false,
     },
-    {"name": "wheat", "status": false},
+    {"name": "Wheat", "status": false},
     {"name": "Nuts", "status": false},
     {"name": "Lactose", "status": false},
     {"name": "Soy", "status": false},
@@ -39,13 +39,13 @@ class _NutritionCountPageState extends State<NutritionCountPage> {
     {"name": "Carrots", "status": false},
   ];
   List<Map<String, dynamic>> nonVegActions = [
-    {"name": "Chicken", "status": true},
-    {"name": "Beef", "status": true},
-    {"name": "Pork", "status": true},
-    {"name": "Lamb", "status": true},
-    {"name": "Fish", "status": true},
-    {"name": "Fish", "status": true},
-    {"name": "wheat", "status": false},
+    {"name": "Chicken", "status": false},
+    {"name": "Beef", "status": false},
+    {"name": "Pork", "status": false},
+    {"name": "Lamb", "status": false},
+    {"name": "Fish", "status": false},
+    {"name": "Fish", "status": false},
+    {"name": "Wheat", "status": false},
     {"name": "Nuts", "status": false},
     {"name": "Lactose", "status": false},
     {"name": "Soy", "status": false},
@@ -70,246 +70,261 @@ class _NutritionCountPageState extends State<NutritionCountPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Nutrition'),
-      ),
-      backgroundColor: Color(0xFFf5f5f5),
-      body: Container(
-          height: Get.height,
-          child: Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  DotStepper(
-                    // direction: Axis.vertical,
-                    dotCount: dotCount,
-                    dotRadius: 12,
+    return WillPopScope(
+      onWillPop: () async {
+        if (activeStep > 0) {
+          setState(() {
+            activeStep--;
+          });
+          return false;
+        }
+        return true;
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Nutrition'),
+        ),
+        backgroundColor: Color(0xFFf5f5f5),
+        body: Container(
+            height: Get.height,
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    DotStepper(
+                      // direction: Axis.vertical,
+                      dotCount: dotCount,
+                      dotRadius: 12,
 
-                    /// THIS MUST BE SET. SEE HOW IT IS CHANGED IN NEXT/PREVIOUS BUTTONS AND JUMP BUTTONS.
-                    activeStep: activeStep,
-                    shape: Shape.pipe,
+                      /// THIS MUST BE SET. SEE HOW IT IS CHANGED IN NEXT/PREVIOUS BUTTONS AND JUMP BUTTONS.
+                      activeStep: activeStep,
+                      shape: Shape.pipe,
 
-                    spacing: 20,
+                      spacing: 20,
 
-                    indicator: Indicator.shift,
+                      indicator: Indicator.shift,
 
-                    /// TAPPING WILL NOT FUNCTION PROPERLY WITHOUT THIS PIECE OF CODE.
-                    onDotTapped: (tappedDotIndex) {
-                      setState(() {
-                        activeStep = tappedDotIndex;
-                      });
-                    },
+                      /// TAPPING WILL NOT FUNCTION PROPERLY WITHOUT THIS PIECE OF CODE.
+                      onDotTapped: (tappedDotIndex) {
+                        setState(() {
+                          activeStep = tappedDotIndex;
+                        });
+                      },
 
-                    // DOT-STEPPER DECORATIONS
-                    fixedDotDecoration: FixedDotDecoration(
-                      color: Colors.grey,
+                      // DOT-STEPPER DECORATIONS
+                      fixedDotDecoration: FixedDotDecoration(
+                        color: Colors.grey,
+                      ),
+
+                      indicatorDecoration: IndicatorDecoration(
+                        // style: PaintingStyle.stroke,
+                        strokeWidth: 0,
+                        color: myPrimaryColor,
+                      ),
+                      lineConnectorDecoration: LineConnectorDecoration(
+                        color: Colors.grey,
+                        strokeWidth: 0,
+                      ),
                     ),
-
-                    indicatorDecoration: IndicatorDecoration(
-                      // style: PaintingStyle.stroke,
-                      strokeWidth: 0,
-                      color: myPrimaryColor,
-                    ),
-                    lineConnectorDecoration: LineConnectorDecoration(
-                      color: Colors.grey,
-                      strokeWidth: 0,
-                    ),
-                  ),
-                ],
-              ),
-              activeStep == 0 ? firstStep() : SizedBox.shrink(),
-              activeStep == 1 ? secondStep() : SizedBox.shrink(),
-              activeStep == 2
-                  ? Expanded(
-                      child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Column(
-                        children: [
-                          heightGapLarge,
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Flexible(
-                                child: const Text(
-                                  "What is your Dietary Preference",
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                      fontSize: 25,
-                                      fontWeight: FontWeight.w600),
+                  ],
+                ),
+                activeStep == 0 ? firstStep() : SizedBox.shrink(),
+                activeStep == 1 ? secondStep() : SizedBox.shrink(),
+                activeStep == 2
+                    ? Expanded(
+                        child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Column(
+                          children: [
+                            heightGapLarge,
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Flexible(
+                                  child: const Text(
+                                    "What is your Dietary Preference",
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                        fontSize: 25,
+                                        fontWeight: FontWeight.w600),
+                                  ),
                                 ),
-                              ),
-                            ],
-                          ),
-                          heightGapMedium2,
-                          const Text(
-                            "Your diet will include foods based on this.",
-                            style: TextStyle(color: Colors.black54),
-                          ),
-                          heightGapMedium2,
-                          Row(
-                            children: [
-                              SizedBox(
-                                child: ActionChip(
-                                    backgroundColor: myWhite,
-                                    onPressed: () {
-                                      setState(() {
-                                        none = !none;
-                                        if (none = true) {
-                                          for (var element in vegActions) {
-                                            element['status'] = false;
-                                            vegMsg = "";
-                                          }
-                                        }
-                                      });
-                                    },
-                                    avatar: none
-                                        ? Icon(
-                                            Icons.check_circle,
-                                            color: myPrimaryColor,
-                                          )
-                                        : Icon(Icons.circle_outlined),
-                                    label: Text("None")),
-                              ),
-                            ],
-                          ),
-                          Divider(
-                            thickness: 2,
-                          ),
-                          SizedBox(
-                            width: double.infinity,
-                            child: Wrap(
-                              crossAxisAlignment: WrapCrossAlignment.start,
-                              spacing: 10,
-                              children: foodAllergiesList()
-                                  .map((e) => ActionChip(
+                              ],
+                            ),
+                            heightGapMedium2,
+                            const Text(
+                              "Your diet will include foods based on this.",
+                              style: TextStyle(color: Colors.black54),
+                            ),
+                            heightGapMedium2,
+                            Row(
+                              children: [
+                                SizedBox(
+                                  child: ActionChip(
                                       backgroundColor: myWhite,
                                       onPressed: () {
                                         setState(() {
-                                          e['status'] = !e['status'];
-                                          vegMsg = "";
-                                          for (var element in vegActions) {
-                                            if (element['status']) {
-                                              if (vegMsg.isEmpty) {
-                                                vegMsg = element['name'];
-                                              } else {
-                                                vegMsg +=
-                                                    ", ${element['name']}";
-                                              }
+                                          none = !none;
+                                          if (none = true) {
+                                            for (var element
+                                                in foodAllergiesList()) {
+                                              element['status'] = false;
+                                              vegMsg = "";
                                             }
-                                            if (vegMsg.isEmpty) {
-                                              none = true;
-                                            } else {
-                                              none = false;
-                                            }
-
-                                            print(vegMsg);
                                           }
                                         });
                                       },
-                                      avatar: e['status']
+                                      avatar: none
                                           ? Icon(
                                               Icons.check_circle,
                                               color: myPrimaryColor,
                                             )
                                           : Icon(Icons.circle_outlined),
-                                      label: Text(e['name'])))
-                                  .toList(),
+                                      label: Text("None")),
+                                ),
+                              ],
                             ),
-                          )
-                        ],
-                      ),
-                    ))
-                  : SizedBox.shrink(),
-              Column(
-                children: [
-                  activeStep == 2 ? Text(vegMsg) : const SizedBox.shrink(),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      TextButton(
-                          onPressed: () {
-                            if (activeStep > 0) {
-                              setState(() {
-                                activeStep--;
-                              });
-                            }
-                          },
-                          child: Row(
-                            children: [
-                              Icon(Icons.arrow_back_ios, size: 15),
-                              Text("Back"),
-                            ],
-                          )),
-                      activeStep < (dotCount - 1)
-                          ? TextButton(
-                              onPressed: () {
-                                if (dotCount > activeStep) {
-                                  setState(() {
-                                    if (gestureFirstStep == 0 &&
-                                        activeStep == 0) {}
-
-                                    activeStep++;
-                                  });
-                                }
-                              },
-                              child: Row(
-                                children: [
-                                  Text("Next"),
-                                  Icon(Icons.arrow_forward_ios, size: 15),
-                                ],
-                              ))
-                          : ElevatedButton(
-                              onPressed: () {
-                                if (dotCount - 1 == activeStep) {
-                                  DashboardService.saveNutritionDiet(
-                                          bodyType: gestureFirstStepArray[
-                                              gestureFirstStep - 1],
-                                          diet: gestureSecondStepArray[
-                                              gestureSecondStep - 1],
-                                          allergy:
-                                              vegMsg.isEmpty ? "none" : vegMsg,
-                                          userId: box.read(StorageConstant.id))
-                                      .then((value) {
-                                    if (value != null) {
-                                      Map<String, dynamic> map = value;
-                                      if (map['status']) {
-                                        Get.defaultDialog(
-                                            title: "Thank you",
-                                            barrierDismissible: false,
-                                            confirmTextColor: Colors.black,
-                                            onConfirm: () {
-                                              if (Get.isDialogOpen!) {
-                                                Get.back();
+                            Divider(
+                              thickness: 2,
+                            ),
+                            SizedBox(
+                              width: double.infinity,
+                              child: Wrap(
+                                crossAxisAlignment: WrapCrossAlignment.start,
+                                spacing: 10,
+                                children: foodAllergiesList()
+                                    .map((e) => ActionChip(
+                                        backgroundColor: myWhite,
+                                        onPressed: () {
+                                          setState(() {
+                                            e['status'] = !e['status'];
+                                            vegMsg = "";
+                                            for (var element
+                                                in foodAllergiesList()) {
+                                              if (element['status']) {
+                                                if (vegMsg.isEmpty) {
+                                                  vegMsg = element['name'];
+                                                } else {
+                                                  vegMsg +=
+                                                      ", ${element['name']}";
+                                                }
                                               }
-                                              Get.offAll(HomePage());
-                                            },
-                                            content: Container(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 20),
-                                              child: Column(
-                                                children: const [
-                                                  Text(
-                                                      "We have your details.\n"),
-                                                  Text(
-                                                      "Our nutritional experts are on their way to help you achieve your desired transformation, by crafting a dedicated diet plan especially for you.\n\nDon't miss our mail. We'll update you soon.\n\nWith love\nTeam SUSU."),
-                                                ],
-                                              ),
-                                            ));
+                                              if (vegMsg.isEmpty) {
+                                                none = true;
+                                              } else {
+                                                none = false;
+                                              }
+
+                                              print(vegMsg);
+                                            }
+                                          });
+                                        },
+                                        avatar: e['status']
+                                            ? Icon(
+                                                Icons.check_circle,
+                                                color: myPrimaryColor,
+                                              )
+                                            : Icon(Icons.circle_outlined),
+                                        label: Text(e['name'])))
+                                    .toList(),
+                              ),
+                            )
+                          ],
+                        ),
+                      ))
+                    : SizedBox.shrink(),
+                Column(
+                  children: [
+                    activeStep == 2 ? Text(vegMsg) : const SizedBox.shrink(),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        TextButton(
+                            onPressed: () {
+                              if (activeStep > 0) {
+                                setState(() {
+                                  activeStep--;
+                                });
+                              }
+                            },
+                            child: Row(
+                              children: [
+                                Icon(Icons.arrow_back_ios, size: 15),
+                                Text("Back"),
+                              ],
+                            )),
+                        activeStep < (dotCount - 1)
+                            ? TextButton(
+                                onPressed: () {
+                                  if (dotCount > activeStep) {
+                                    setState(() {
+                                      if (gestureFirstStep == 0 &&
+                                          activeStep == 0) {}
+
+                                      activeStep++;
+                                    });
+                                  }
+                                },
+                                child: Row(
+                                  children: [
+                                    Text("Next"),
+                                    Icon(Icons.arrow_forward_ios, size: 15),
+                                  ],
+                                ))
+                            : ElevatedButton(
+                                onPressed: () {
+                                  if (dotCount - 1 == activeStep) {
+                                    DashboardService.saveNutritionDiet(
+                                            bodyType: gestureFirstStepArray[
+                                                gestureFirstStep - 1],
+                                            diet: gestureSecondStepArray[
+                                                gestureSecondStep - 1],
+                                            allergy: vegMsg.isEmpty
+                                                ? "none"
+                                                : vegMsg,
+                                            userId:
+                                                box.read(StorageConstant.id))
+                                        .then((value) {
+                                      if (value != null) {
+                                        Map<String, dynamic> map = value;
+                                        if (map['status']) {
+                                          Get.defaultDialog(
+                                              title: "Thank you",
+                                              barrierDismissible: false,
+                                              confirmTextColor: Colors.black,
+                                              onConfirm: () {
+                                                if (Get.isDialogOpen!) {
+                                                  Get.back();
+                                                }
+                                                Get.offAll(HomePage());
+                                              },
+                                              content: Container(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 20),
+                                                child: Column(
+                                                  children: const [
+                                                    Text(
+                                                        "We have your details.\n"),
+                                                    Text(
+                                                        "Our nutritional experts are on their way to help you achieve your desired transformation, by crafting a dedicated diet plan especially for you.\n\nDon't miss our mail. We'll update you soon.\n\nWith love\nTeam SUSU."),
+                                                  ],
+                                                ),
+                                              ));
+                                        }
                                       }
-                                    }
-                                  });
-                                }
-                              },
-                              child: const Text("Submit"))
-                    ],
-                  ),
-                ],
-              ),
-            ],
-          )),
+                                    });
+                                  }
+                                },
+                                child: const Text("Submit"))
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            )),
+      ),
     );
   }
 
@@ -355,13 +370,7 @@ class _NutritionCountPageState extends State<NutritionCountPage> {
                   padding: const EdgeInsets.all(12.0),
                   child: Row(
                     children: [
-                      CircleAvatar(
-                        backgroundColor: myPrimaryColor,
-                        child: Icon(
-                          Icons.food_bank,
-                          color: myWhite,
-                        ),
-                      ),
+                      iconImages("weight.png"),
                       SizedBox(
                         width: 10,
                       ),
@@ -401,13 +410,7 @@ class _NutritionCountPageState extends State<NutritionCountPage> {
                   padding: const EdgeInsets.all(12.0),
                   child: Row(
                     children: [
-                      CircleAvatar(
-                        backgroundColor: myPrimaryColor,
-                        child: Icon(
-                          Icons.food_bank,
-                          color: myWhite,
-                        ),
-                      ),
+                      iconImages("muscle.png"),
                       SizedBox(
                         width: 10,
                       ),
@@ -418,7 +421,7 @@ class _NutritionCountPageState extends State<NutritionCountPage> {
                             "Muscles Gain",
                             style: TextStyle(fontWeight: FontWeight.w600),
                           ),
-                          Text("Want to Gain some extra weight",
+                          Text("Want to gain some extra weight",
                               style: TextStyle(
                                   color: Colors.black54, fontSize: 14)),
                         ],
@@ -447,13 +450,7 @@ class _NutritionCountPageState extends State<NutritionCountPage> {
                   padding: const EdgeInsets.all(12.0),
                   child: Row(
                     children: [
-                      CircleAvatar(
-                        backgroundColor: myPrimaryColor,
-                        child: Icon(
-                          Icons.food_bank,
-                          color: myWhite,
-                        ),
-                      ),
+                      iconImages("performance.png"),
                       SizedBox(
                         width: 10,
                       ),
@@ -464,7 +461,7 @@ class _NutritionCountPageState extends State<NutritionCountPage> {
                             "Performance",
                             style: TextStyle(fontWeight: FontWeight.w600),
                           ),
-                          Text("Want to Achieve ultimate fitness level",
+                          Text("Want to achieve ultimate fitness level",
                               style: TextStyle(
                                   color: Colors.black54, fontSize: 14)),
                         ],
@@ -478,6 +475,17 @@ class _NutritionCountPageState extends State<NutritionCountPage> {
         ],
       ),
     ));
+  }
+
+  CircleAvatar iconImages(String image, [double? width]) {
+    return CircleAvatar(
+      backgroundColor: myWhite,
+      child: Image.asset(
+        "assets/images/$image",
+        color: myBlack,
+        width: width ?? 20,
+      ),
+    );
   }
 
   Expanded secondStep() {
@@ -522,13 +530,7 @@ class _NutritionCountPageState extends State<NutritionCountPage> {
                   padding: const EdgeInsets.all(12.0),
                   child: Row(
                     children: [
-                      CircleAvatar(
-                        backgroundColor: myPrimaryColor,
-                        child: Icon(
-                          Icons.food_bank,
-                          color: myWhite,
-                        ),
-                      ),
+                      iconImages("chicken.png"),
                       SizedBox(
                         width: 10,
                       ),
@@ -539,7 +541,7 @@ class _NutritionCountPageState extends State<NutritionCountPage> {
                             "Non Vegetarian",
                             style: TextStyle(fontWeight: FontWeight.w600),
                           ),
-                          Text("Chicken,Red Meat,Fish,Prawns etc",
+                          Text("Chicken, Red Meat, Fish, Prawns etc",
                               style: TextStyle(
                                   color: Colors.black54, fontSize: 14)),
                         ],
@@ -568,10 +570,7 @@ class _NutritionCountPageState extends State<NutritionCountPage> {
                   padding: const EdgeInsets.all(12.0),
                   child: Row(
                     children: [
-                      CircleAvatar(
-                        backgroundColor: myPrimaryColor,
-                        child: Icon(Icons.food_bank, color: myWhite),
-                      ),
+                      iconImages("wheat.png"),
                       SizedBox(
                         width: 10,
                       ),
@@ -582,7 +581,7 @@ class _NutritionCountPageState extends State<NutritionCountPage> {
                             "Vegetarian",
                             style: TextStyle(fontWeight: FontWeight.w600),
                           ),
-                          Text("Dale,Rice,Wheat,Gram,Vegetable etc",
+                          Text("Dale, Rice, Wheat, Grams, Vegetable etc",
                               style: TextStyle(
                                   color: Colors.black54, fontSize: 14)),
                         ],
@@ -611,13 +610,7 @@ class _NutritionCountPageState extends State<NutritionCountPage> {
                   padding: const EdgeInsets.all(12.0),
                   child: Row(
                     children: [
-                      CircleAvatar(
-                        backgroundColor: myPrimaryColor,
-                        child: Icon(
-                          Icons.food_bank,
-                          color: myWhite,
-                        ),
-                      ),
+                      iconImages("egg.png"),
                       SizedBox(
                         width: 10,
                       ),
@@ -628,7 +621,7 @@ class _NutritionCountPageState extends State<NutritionCountPage> {
                             "Eggitarian",
                             style: TextStyle(fontWeight: FontWeight.w600),
                           ),
-                          Text("Eggs, Vegetable, etc",
+                          Text("Eggs, Fruits ,Vegetable, etc",
                               style: TextStyle(
                                   color: Colors.black54, fontSize: 14)),
                         ],

@@ -163,7 +163,7 @@ class _AccountPageState extends State<AccountPage> {
                     CircleAvatar(
                       radius: 40,
                       child: Image.asset(
-                        "assets/images/boy.png",
+                        "assets/images/${box.read(StorageConstant.gender) == 'male' ? 'male' : 'female'}.png",
                       ),
                     ),
                     SizedBox(

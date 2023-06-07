@@ -34,4 +34,9 @@ class StorageConstant {
   static const history = "history";
   static const userStatus = "user_status";
   static const lastOrderDate = "last_order_date";
+  static const firstTimeUser = "first_time_user";
+  // `profile_lock`, `new_order_lock`, `next_date`
+  static const profile_lock = "profile_lock";
+  static const new_order_lock = "new_order_lock";
+  static const next_date = "next_date";
 }

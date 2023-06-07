@@ -4,6 +4,8 @@
 
 import 'dart:convert';
 
+import 'package:intl/intl.dart';
+
 StepHistoryDetailModal stepHistoryDetailModalFromJson(String str) =>
     StepHistoryDetailModal.fromJson(json.decode(str));
 
@@ -48,6 +50,7 @@ class Today {
   final DateTime? date;
   final DateTime? createdAt;
   final DateTime? updatedAt;
+  final DateTime? lastOrderDate;
 
   Today({
     this.id,
@@ -58,14 +61,15 @@ class Today {
     this.date,
     this.createdAt,
     this.updatedAt,
+    this.lastOrderDate,
   });
 
   factory Today.fromJson(Map<String, dynamic> json) => Today(
-        id: json["id"],
-        userId: json["user_id"],
-        goal: json["goal"],
-        steps: json["steps"],
-        calorie: json["calorie"],
+        id: json["id"] ?? "",
+        userId: json["user_id"] ?? "",
+        goal: json["goal"] != null ? json["goal"].toString() : null,
+        steps: json["steps"] != null ? json["steps"].toString() : null,
+        calorie: json["calorie"] != null ? json["calorie"].toString() : null,
         date: json["date"] == null ? null : DateTime.parse(json["date"]),
         createdAt: json["created_at"] == null
             ? null
@@ -73,6 +77,9 @@ class Today {
         updatedAt: json["updated_at"] == null
             ? null
             : DateTime.parse(json["updated_at"]),
+        lastOrderDate: json["last_order_date"] == null
+            ? null
+            : DateFormat("dd-MM-yyyy").parse(json["last_order_date"]),
       );
 
   Map<String, dynamic> toJson() => {
