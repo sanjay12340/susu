@@ -261,7 +261,7 @@ class _WaterPageState extends State<WaterPage> {
                             child: Padding(
                           padding: EdgeInsets.all(8.0),
                           child: Text(
-                            "when you are trying to lose weight drink if you glass of water about 30 minutes before a meal.  This will come to the hydrate the tissues and can also lower the amount of food consumed",
+                            "While you are trying to lose some extra weight, always try to drink a glass of water about 30 minutes before your meal. This will eventually hydrate your tissues and can also lower the amount of food consumed.",
                             style: TextStyle(fontWeight: FontWeight.w500),
                           ),
                         ))

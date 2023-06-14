@@ -242,7 +242,8 @@ class _LabHomePageState extends State<LabHomePage> {
                         onPressed: () {
                           Get.to(LabTestList(
                             title: "My Pending",
-                            status: "pending",
+                            status: "captured",
+                            labid: box.read(StorageConstant.id),
                           ));
                         },
                         child: Text("My Pending"))),

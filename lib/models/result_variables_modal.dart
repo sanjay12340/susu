@@ -15,38 +15,38 @@ class ResultVariablesModal {
   ResultVariablesModal({
     this.id,
     this.name,
-    this.star,
+    this.start,
     this.fname,
     this.end,
-    this.alise,
+    this.alias,
     this.dimention,
   });
 
   final String? id;
   final String? name;
-  final String? star;
+  final String? start;
   final String? end;
   final String? fname;
-  final String? alise;
+  final String? alias;
   final String? dimention;
 
   factory ResultVariablesModal.fromJson(Map<String, dynamic> json) =>
       ResultVariablesModal(
         id: json["id"],
         name: json["name"],
-        star: json["star"],
+        start: json["start"],
         end: json["end"],
         fname: json["fname"],
-        alise: json["alise"],
+        alias: json["alias"],
         dimention: json["dimention"],
       );
 
   Map<String, dynamic> toJson() => {
         "id": id,
         "name": name,
-        "star": star,
+        "start": start,
         "end": end,
-        "alise": alise,
+        "alias": alias,
         "dimention": dimention,
       };
 }

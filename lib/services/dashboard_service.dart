@@ -18,6 +18,7 @@ import '../models/result_variables_modal.dart';
 import '../models/step_history_detail_modal.dart';
 import '../models/test_data_modal.dart';
 import '../models/water_history_detail_modal.dart';
+import '../models/water_taken_today_modal.dart';
 import '../utils/links.dart';
 
 class DashboardService {
@@ -63,6 +64,25 @@ class DashboardService {
       String email, String otp, String password) async {
     String uri =
         "$main_url$token&update_password=yes&email=$email&otp=$otp&password=$password";
+    print(uri);
+    var url = Uri.parse(uri);
+    var responce = await client.get(url);
+    try {
+      if (responce.statusCode == 200) {
+        var jsonbody = responce.body;
+
+        return jsonDecode(jsonbody);
+      } else {
+        return null;
+      }
+    } catch (e) {
+      return null;
+    }
+  }
+
+  static Future<Map<String, dynamic>?> verifyEmail(
+      String email, String otp) async {
+    String uri = "$main_url$token&verify_email=yes&email=$email&otp=$otp";
     print(uri);
     var url = Uri.parse(uri);
     var responce = await client.get(url);
@@ -222,11 +242,12 @@ class DashboardService {
   }
 
   static Future<Map<String, dynamic>?> loginUser(
-      String username, String password) async {
+      String username, String password, String device_token) async {
     Map<String, dynamic> map = {
       "login": "yes",
       "username": username,
       "password": password,
+      "device_token": device_token,
       "tk": token2,
     };
     if (kDebugMode) {
@@ -277,6 +298,7 @@ class DashboardService {
     }
     if (kDebugMode) {
       print("assdasadas $map");
+      print("url $main_url");
     }
     var url = Uri.parse("$main_url");
     var response = await client.post(
@@ -478,6 +500,28 @@ class DashboardService {
           print(jsonbody);
         }
         return waterHistoryDetailModalFromJson(jsonbody);
+      } else {
+        return null;
+      }
+    } catch (e) {
+      print("catch $e");
+      return null;
+    }
+  }
+
+  static Future<WaterTakenTodayModal?> fetchWaterTakenTodayReport(
+      String userId) async {
+    print("$main_url$token&fetch_water_intake_today=yes&user_id=$userId");
+    var url = Uri.parse(
+        "$main_url$token&fetch_water_intake_today=yes&user_id=$userId");
+    var response = await client.get(url);
+    try {
+      if (response.statusCode == 200) {
+        var jsonbody = response.body;
+        if (kDebugMode) {
+          print(jsonbody);
+        }
+        return waterTakenTodayModalFromJson(jsonbody);
       } else {
         return null;
       }

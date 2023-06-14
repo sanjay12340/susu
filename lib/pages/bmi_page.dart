@@ -193,7 +193,7 @@ Your doctor will evaluate your BMI, waist measurement, and other risk factors fo
             
 The good news is even a small weight loss (between 5 and 10 percent of your current weight) will help lower your risk of developing those diseases.
             
-You can also SuSu advanced nutritional experts for a complete diet solution.""")
+ Feel free to get connected with our nutritional experts in the Nutrition Section of your dashboard to craft a dedicated diet plan, especially for you.""")
                 ],
               ),
             ),

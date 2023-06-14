@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:susu/pages/nutrition_count_page.dart';
@@ -10,6 +10,7 @@ import 'package:susu/utils/storage_constant.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 
 import '../models/order_detail_full_modal.dart';
+import '../mywidgets/save_button_pdf_widget.dart';
 import '../utils/mycontant.dart';
 import '../utils/util.dart';
 import 'bmi_page.dart';
@@ -44,14 +45,13 @@ class _ReportDetailPageState extends State<ReportDetailPage> {
   int normal = 0;
   int bad = 0;
   String? bmi;
+  double value = 0;
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     reportDetail();
   }
-
- 
 
   Color getColorCode(int number) {
     if (number > 9) {
@@ -67,14 +67,32 @@ class _ReportDetailPageState extends State<ReportDetailPage> {
 
   String getConditionText(int number) {
     if (number > 9) {
+      value = 22.5;
       return "Healthy";
     } else if (number >= 6 && number <= 8) {
+      value = 57.5;
       return "Unhealthy";
     } else if (number >= 3 && number <= 5) {
+      value = 102.5;
       return "Toxic";
     } else {
+      value = 150;
       return "Infected";
     }
+  }
+
+  void getConditionTextValue(int number) {
+    setState(() {
+      if (number > 9) {
+        value = 22.5;
+      } else if (number >= 6 && number <= 8) {
+        value = 57.5;
+      } else if (number >= 3 && number <= 5) {
+        value = 102.5;
+      } else {
+        value = 162.5;
+      }
+    });
   }
 
   void reportDetail() {
@@ -105,10 +123,12 @@ class _ReportDetailPageState extends State<ReportDetailPage> {
                 if ((e.condtion ?? "").toLowerCase() == "normal") {
                   normal++;
                 }
+                getConditionTextValue(normal);
+
                 reportData.add(
                   TableRow(children: [
                     tableCell(e.fname, Colors.black87, false, true),
-                    tableCell(e.alise, Colors.black87, true),
+                    tableCell(e.alias, Colors.black87, true),
                     tableCell(
                         e.value,
                         (e.condtion ?? "").toLowerCase() == "normal"
@@ -158,7 +178,23 @@ class _ReportDetailPageState extends State<ReportDetailPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Report Detail")),
+      appBar: AppBar(
+        title: const Text("Report Detail"),
+        actions: [
+          if (orderDetailFullModal != null)
+            SaveBtnBuilder(
+                scheduledPicktimeStart: DateFormat("dd-MM-yyyy").format(
+                    orderDetailFullModal!.orderDetail!.scheduledPicktimeStart!),
+                age: calculateAge(
+                        fromDate: orderDetailFullModal!
+                            .orderDetail!.scheduledPicktimeStart!)
+                    .toStringAsFixed(0),
+                bmi: bmi,
+                normal: normal,
+                orderDetailFullModal: orderDetailFullModal),
+          gapWidthM2
+        ],
+      ),
       body: SingleChildScrollView(
         child: orderDetailFullModal != null
             ? Padding(
@@ -328,116 +364,129 @@ class _ReportDetailPageState extends State<ReportDetailPage> {
                         ),
                       ),
                     ),
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 12),
-                      child: Align(
-                        alignment: Alignment.center,
-                        child: Text(
-                          "Body Statistics",
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 18),
-                        ),
-                      ),
-                    ),
+                    gapHeightM2,
                     SizedBox(
-                      height: 300,
-                      child: SvgPicture.asset(
-                        box.read(StorageConstant.gender) == "male"
-                            ? "assets/images/male.svg"
-                            : "assets/images/female.svg",
-                        color: getColorCode(normal),
-                      ),
-                    ),
-                    Center(
-                      child: Card(
-                        color: getColorCode(normal).withAlpha(1),
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text(
-                            getConditionText(normal),
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: getColorCode(normal),
-                                fontSize: 18),
+                      height: 210,
+                      width: double.infinity,
+                      child: Stack(
+                        alignment: Alignment.topCenter,
+                        children: [
+                          Positioned(
+                            child: Column(
+                              children: [
+                                Text(
+                                  "Performance Meter",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 22,
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: 100,
+                                  child: Divider(
+                                    thickness: 3,
+                                    color: myPrimaryColor,
+                                  ),
+                                )
+                              ],
+                            ),
                           ),
-                        ),
+                          Positioned(
+                              top: -70, child: _buildRadialTextPointer()),
+                        ],
                       ),
                     ),
-                    // Padding(
-                    //   padding: EdgeInsets.symmetric(horizontal: 20),
-                    //   child: Column(
-                    //     children: [
-                    //       Row(
-                    //         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    //         children: [
-                    //           Expanded(
-                    //             child: Column(
-                    //               children: [
-                    //                 Row(
-                    //                   children: [
-                    //                     CircleAvatar(
-                    //                       backgroundColor: healthColor,
-                    //                       radius: 10,
-                    //                     ),
-                    //                     SizedBox(
-                    //                       width: 10,
-                    //                     ),
-                    //                     Text("Healthy"),
-                    //                   ],
-                    //                 ),
-                    //                 gapHeightM1,
-                    //                 Row(
-                    //                   children: [
-                    //                     CircleAvatar(
-                    //                       backgroundColor: unHealthColor,
-                    //                       radius: 10,
-                    //                     ),
-                    //                     SizedBox(
-                    //                       width: 10,
-                    //                     ),
-                    //                     Text("Unhealthy"),
-                    //                   ],
-                    //                 ),
-                    //               ],
-                    //             ),
-                    //           ),
-                    //           Expanded(
-                    //             child: Column(
-                    //               children: [
-                    //                 Row(
-                    //                   children: [
-                    //                     CircleAvatar(
-                    //                       backgroundColor: toxicColor,
-                    //                       radius: 10,
-                    //                     ),
-                    //                     SizedBox(
-                    //                       width: 10,
-                    //                     ),
-                    //                     Text("Toxic"),
-                    //                   ],
-                    //                 ),
-                    //                 gapHeightM1,
-                    //                 Row(
-                    //                   children: [
-                    //                     CircleAvatar(
-                    //                       backgroundColor: infectedColor,
-                    //                       radius: 10,
-                    //                     ),
-                    //                     SizedBox(
-                    //                       width: 10,
-                    //                     ),
-                    //                     const Text("Infected"),
-                    //                   ],
-                    //                 ),
-                    //               ],
-                    //             ),
-                    //           ),
-                    //         ],
+                    // Center(
+                    //   child: Card(
+                    //     color: getColorCode(normal).withAlpha(1),
+                    //     child: Padding(
+                    //       padding: const EdgeInsets.all(8.0),
+                    //       child: Text(
+                    //         getConditionText(normal),
+                    //         style: TextStyle(
+                    //             fontWeight: FontWeight.bold,
+                    //             color: getColorCode(normal),
+                    //             fontSize: 18),
                     //       ),
-                    //     ],
+                    //     ),
                     //   ),
                     // ),
-                    // gap,
+                    Padding(
+                      padding: EdgeInsets.symmetric(
+                          horizontal: Get.size.width * 0.15),
+                      child: Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  children: [
+                                    Row(
+                                      children: [
+                                        CircleAvatar(
+                                          backgroundColor: healthColor,
+                                          radius: 10,
+                                        ),
+                                        SizedBox(
+                                          width: 10,
+                                        ),
+                                        Text("Vitality"),
+                                      ],
+                                    ),
+                                    gapHeightM1,
+                                    Row(
+                                      children: [
+                                        CircleAvatar(
+                                          backgroundColor: unHealthColor,
+                                          radius: 10,
+                                        ),
+                                        SizedBox(
+                                          width: 10,
+                                        ),
+                                        Text("Deviant"),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Expanded(
+                                child: Column(
+                                  children: [
+                                    Row(
+                                      children: [
+                                        CircleAvatar(
+                                          backgroundColor: toxicColor,
+                                          radius: 10,
+                                        ),
+                                        SizedBox(
+                                          width: 10,
+                                        ),
+                                        Text("Unfit"),
+                                      ],
+                                    ),
+                                    gapHeightM1,
+                                    Row(
+                                      children: [
+                                        CircleAvatar(
+                                          backgroundColor: infectedColor,
+                                          radius: 10,
+                                        ),
+                                        SizedBox(
+                                          width: 10,
+                                        ),
+                                        const Text("Lethal"),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    gap,
                     Center(
                         child: Padding(
                       padding: const EdgeInsets.all(8.0),
@@ -493,7 +542,7 @@ class _ReportDetailPageState extends State<ReportDetailPage> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   const Text(
-                                      "Can you really walk your way to fitness? You bet! Get started today."),
+                                      "You can really walk your way to fitness. Yet not sure! Don't worry, let's get started today."),
                                   gapHeightM1,
                                   const Text(
                                     "Know the benefits",
@@ -521,10 +570,16 @@ class _ReportDetailPageState extends State<ReportDetailPage> {
                                     "Reduce stress and tension"
                                   ].map((e) {
                                     return Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
-                                        const CircleAvatar(
-                                          radius: 3,
-                                          backgroundColor: Colors.black87,
+                                        Padding(
+                                          padding:
+                                              const EdgeInsets.only(top: 5),
+                                          child: const CircleAvatar(
+                                            radius: 3,
+                                            backgroundColor: Colors.black87,
+                                          ),
                                         ),
                                         gapWidthS,
                                         Flexible(child: Text(e))
@@ -593,10 +648,16 @@ class _ReportDetailPageState extends State<ReportDetailPage> {
                                     "Make good decisions and avoid injuries — for example, drowsy drivers cause thousands of car accidents every year",
                                   ].map((e) {
                                     return Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
-                                        const CircleAvatar(
-                                          radius: 3,
-                                          backgroundColor: Colors.black87,
+                                        Padding(
+                                          padding:
+                                              const EdgeInsets.only(top: 5),
+                                          child: const CircleAvatar(
+                                            radius: 3,
+                                            backgroundColor: Colors.black87,
+                                          ),
                                         ),
                                         gapWidthS,
                                         Flexible(child: Text(e))
@@ -823,10 +884,16 @@ class _ReportDetailPageState extends State<ReportDetailPage> {
                                     "Get rid of wastes through urination, perspiration, and bowel movements.",
                                   ].map((e) {
                                     return Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
-                                        const CircleAvatar(
-                                          radius: 3,
-                                          backgroundColor: Colors.black87,
+                                        Padding(
+                                          padding:
+                                              const EdgeInsets.only(top: 5),
+                                          child: const CircleAvatar(
+                                            radius: 3,
+                                            backgroundColor: Colors.black87,
+                                          ),
                                         ),
                                         gapWidthS,
                                         Flexible(child: Text(e))
@@ -981,7 +1048,7 @@ minerals in your body."""),
                                 """A urinalysis is a test that determines whether you have blood in your urine, which indicates your 
 general health as well as the health of your urinary tract, kidneys, and liver."""),
                       ]),
-                    )
+                    ),
                   ],
                 ),
               )
@@ -1021,6 +1088,7 @@ general health as well as the health of your urinary tract, kidneys, and liver."
 
   SfRadialGauge _buildRadialTextPointer() {
     var isCardView = true;
+
     return SfRadialGauge(
       axes: <RadialAxis>[
         RadialAxis(
@@ -1032,11 +1100,11 @@ general health as well as the health of your urinary tract, kidneys, and liver."
             maximum: 180,
             canScaleToFit: true,
             radiusFactor: 0.79,
-            pointers: const <GaugePointer>[
+            pointers: <GaugePointer>[
               NeedlePointer(
                   needleEndWidth: 5,
                   needleLength: 0.7,
-                  value: 80,
+                  value: value,
                   animationDuration: 3000,
                   enableAnimation: true,
                   knobStyle: KnobStyle(knobRadius: 0)),
@@ -1240,7 +1308,7 @@ class MyChip extends StatelessWidget {
                   name!,
                   style: TextStyle(
                       fontSize: nameSize ?? 16, fontWeight: FontWeight.w700),
-                )
+                ),
               ],
             ),
           ),

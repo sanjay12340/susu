@@ -152,12 +152,13 @@ class OrderReport {
   final String? variableId;
   final String? name;
   final String? fname;
-
+  final String? end;
+  final String? start;
   final String? value;
   final DateTime? createAt;
-  final String? alise;
+  final String? alias;
   final String? pCondition;
-  final String? dimention;
+  final String? dimension;
 
   OrderReport({
     this.id,
@@ -167,9 +168,11 @@ class OrderReport {
     this.name,
     this.value,
     this.createAt,
-    this.alise,
+    this.alias,
     this.pCondition,
-    this.dimention,
+    this.dimension,
+    this.end,
+    this.start,
   });
 
   factory OrderReport.fromJson(Map<String, dynamic> json) => OrderReport(
@@ -182,9 +185,11 @@ class OrderReport {
         createAt: json["create_at"] == null
             ? null
             : DateTime.parse(json["create_at"]),
-        alise: json["alise"],
+        alias: json["alias"],
         pCondition: json["p_condition"],
-        dimention: json["dimention"],
+        dimension: json["dimension"],
+        start: json["start"],
+        end: json["end"],
       );
 
   Map<String, dynamic> toJson() => {
@@ -194,9 +199,11 @@ class OrderReport {
         "name": name,
         "value": value,
         "create_at": createAt?.toIso8601String(),
-        "alise": alise,
+        "alias": alias,
         "p_condition": pCondition,
-        "dimention": dimention,
+        "dimension": dimension,
+        "start": start,
+        "end": end,
       };
 }
 

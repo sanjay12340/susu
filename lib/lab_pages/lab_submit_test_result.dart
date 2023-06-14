@@ -37,10 +37,15 @@ class _LabSubmitTestResultState extends State<LabSubmitTestResult> {
     report = [];
     for (var element in listController) {
       report.add(ReportSubmitData(
-          orderId: uo!.orderDetail!.id!,
-          variableId: "",
-          name: element.name!,
-          value: element.controller.text));
+        orderId: uo!.orderDetail!.id!,
+        variableId: "",
+        name: element.name!,
+        value: element.controller.text,
+        fname: element.fname,
+        start: element.start,
+        end: element.end,
+        alias: element.alias,
+      ));
     }
     DashboardService.saveReportDeatil(
             report: report, orderId: uo!.orderDetail!.id!)
@@ -201,8 +206,11 @@ class _LabSubmitTestResultState extends State<LabSubmitTestResult> {
                                 var f = FormTextField(
                                   name: e.name,
                                   index: index,
-                                  dimension: e.alise!,
-                                  fanme: e.fname,
+                                  dimension: e.alias!,
+                                  fname: e.fname!,
+                                  alias: e.alias!,
+                                  end: e.end!,
+                                  start: e.start!,
                                 );
                                 f.controller.text = e.value!;
                                 listController.add(f);
@@ -217,8 +225,11 @@ class _LabSubmitTestResultState extends State<LabSubmitTestResult> {
                                 var f = FormTextField(
                                   name: e.name,
                                   index: index,
-                                  dimension: e.alise!,
-                                  fanme: e.fname,
+                                  dimension: e.alias!,
+                                  fname: e.fname!,
+                                  alias: e.alias!,
+                                  end: e.end!,
+                                  start: e.start!,
                                 );
 
                                 listController.add(f);
@@ -254,12 +265,19 @@ class FormTextField extends StatelessWidget {
     this.name,
     required this.index,
     required this.dimension,
-    this.fanme,
+    required this.fname,
+    required this.alias,
+    required this.start,
+    required this.end,
   });
   final String? name;
-  final String? fanme;
+
   final int index;
   final String dimension;
+  final String fname;
+  final String alias;
+  final String start;
+  final String end;
   TextEditingController controller = TextEditingController();
 
   @override
@@ -278,13 +296,20 @@ class FormTextField extends StatelessWidget {
               decoration: InputDecoration(
                   contentPadding:
                       EdgeInsets.symmetric(vertical: 2, horizontal: 20),
-                  hintText: fanme ?? name,
+                  hintText: fname,
                   labelText: name,
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(20))),
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return "Value cant Empty";
+                }
+
+                if (name == "PH" || name == "SG") {
+                  double v = double.parse(value);
+                  if (v <= 0) {
+                    return "Value can't less or equal to 0";
+                  }
                 }
                 return null;
               },

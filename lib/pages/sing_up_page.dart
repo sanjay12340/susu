@@ -199,9 +199,9 @@ class _SingUpPageState extends State<SingUpPage> {
                                     if (_formKey.currentState!.validate()) {
                                       if (_otp.text == random.toString() &&
                                           !_alreadyNumber.value) {
-                                        Get.to(
-                                          () => SignUPFinalPage(),
-                                        );
+                                        // Get.to(
+                                        //     // () => SignUPFinalPage(email: ),
+                                        //     );
                                       } else {
                                         print("not validated");
                                       }

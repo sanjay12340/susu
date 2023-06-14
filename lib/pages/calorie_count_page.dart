@@ -267,7 +267,7 @@ class _CalorieCountPageState extends State<CalorieCountPage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      "Result : ${bmr.toStringAsFixed(2)} calories per day required ",
+                      "Result : ${bmr.toStringAsFixed(0)} calories per day required ",
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     )
                   ],
@@ -402,7 +402,7 @@ class _CalorieCountPageState extends State<CalorieCountPage> {
       ),
       TableCell(
         child: Center(
-          child: Text((bmr * rowValue).toStringAsFixed(2)),
+          child: Text((bmr * rowValue).toStringAsFixed(0)),
         ),
       ),
     ]);

@@ -88,7 +88,7 @@ class ReportDetail {
   final String? fname;
   final String? value;
   final DateTime? createAt;
-  final String? alise;
+  final String? alias;
   final String? condtion;
 
   ReportDetail({
@@ -99,7 +99,7 @@ class ReportDetail {
     this.fname,
     this.value,
     this.createAt,
-    this.alise,
+    this.alias,
     this.condtion,
   });
 
@@ -113,7 +113,7 @@ class ReportDetail {
         createAt: json["create_at"] == null
             ? null
             : DateTime.parse(json["create_at"]),
-        alise: json["alise"],
+        alias: json["alias"],
         condtion: json["p_condition"],
       );
 
@@ -125,7 +125,7 @@ class ReportDetail {
         "fname": fname,
         "value": value,
         "create_at": createAt?.toIso8601String(),
-        "alise": alise,
+        "alias": alias,
         "p_condition": condtion,
       };
 }

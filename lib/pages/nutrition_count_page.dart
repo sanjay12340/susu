@@ -381,7 +381,7 @@ class _NutritionCountPageState extends State<NutritionCountPage> {
                             "Weight Loss",
                             style: TextStyle(fontWeight: FontWeight.w600),
                           ),
-                          Text("Want to loose some extra inches",
+                          Text("Want to loose some extra  inches",
                               style: TextStyle(
                                   color: Colors.black54, fontSize: 14)),
                         ],
@@ -421,7 +421,7 @@ class _NutritionCountPageState extends State<NutritionCountPage> {
                             "Muscles Gain",
                             style: TextStyle(fontWeight: FontWeight.w600),
                           ),
-                          Text("Want to gain some extra weight",
+                          Text("Want to gain some extra muscle weight",
                               style: TextStyle(
                                   color: Colors.black54, fontSize: 14)),
                         ],

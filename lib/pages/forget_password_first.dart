@@ -301,7 +301,7 @@ class _ForgetPasswordState extends State<ForgetPassword> {
                                         onPressed: () {
                                           _showOTPbox.value = false;
                                         },
-                                        child: Text("change Email id",
+                                        child: Text("Change Email id",
                                             style: TextStyle(color: myWhite))),
                                   ),
                                 ],

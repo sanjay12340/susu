@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'dart:math';
 
+import 'package:susu/pages/sign_up_final.dart';
+import 'package:susu/pages/sing_up_page.dart';
 import 'package:susu/services/dashboard_service.dart';
 import 'package:susu/services/game_result_service.dart';
 import 'package:susu/services/genral_api_call.dart';
@@ -12,14 +14,14 @@ import 'package:get/get.dart';
 
 import 'forget_password_final.dart';
 
-class ForgetPassword extends StatefulWidget {
-  ForgetPassword({Key? key}) : super(key: key);
+class VerifyEmailPage extends StatefulWidget {
+  VerifyEmailPage({Key? key}) : super(key: key);
 
   @override
-  _ForgetPasswordState createState() => _ForgetPasswordState();
+  _VerifyEmailPageState createState() => _VerifyEmailPageState();
 }
 
-class _ForgetPasswordState extends State<ForgetPassword> {
+class _VerifyEmailPageState extends State<VerifyEmailPage> {
   final TextEditingController _email = TextEditingController();
   final TextEditingController _otp = TextEditingController();
 
@@ -72,14 +74,14 @@ class _ForgetPasswordState extends State<ForgetPassword> {
               height: 60,
             ),
             Text(
-              "Let's Reset Passowrd",
+              "Let's Start",
               style: TextStyle(
                   color: myBlack.withOpacity(.7),
                   fontWeight: FontWeight.bold,
                   fontSize: 25),
             ),
             Text(
-              "Forget Passord",
+              "Create new account",
               style: TextStyle(
                   color: myBlack.withOpacity(.7),
                   fontWeight: FontWeight.bold,
@@ -189,7 +191,7 @@ class _ForgetPasswordState extends State<ForgetPassword> {
                                     if (_formKey.currentState!.validate()) {
                                       if (_otp.text == random.toString()) {
                                         Get.to(
-                                          () => ForgetPasswordFinal(
+                                          () => SignUPFinalPage(
                                             email: _email.text,
                                           ),
                                         );
@@ -220,7 +222,7 @@ class _ForgetPasswordState extends State<ForgetPassword> {
                                       random = Random().nextInt(9999) + 1000;
 
                                       print("Send");
-                                      DashboardService.resetPassword(
+                                      DashboardService.verifyEmail(
                                               _email.text, random.toString())
                                           .then((value) {
                                         _waiting.value = false;
@@ -268,7 +270,7 @@ class _ForgetPasswordState extends State<ForgetPassword> {
                                         onPressed: () {
                                           random =
                                               Random().nextInt(9999) + 1000;
-                                          DashboardService.resetPassword(
+                                          DashboardService.verifyEmail(
                                                   _email.text,
                                                   random.toString())
                                               .then((value) {
@@ -301,7 +303,7 @@ class _ForgetPasswordState extends State<ForgetPassword> {
                                         onPressed: () {
                                           _showOTPbox.value = false;
                                         },
-                                        child: Text("change Email id",
+                                        child: Text("Change Email id",
                                             style: TextStyle(color: myWhite))),
                                   ),
                                 ],

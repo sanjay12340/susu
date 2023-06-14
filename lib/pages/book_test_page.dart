@@ -220,10 +220,6 @@ class _BookTestPageState extends State<BookTestPage> {
                       addressFormField(
                         controller: pin,
                         name: "Pin Code",
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly
-                        ],
-                        textInputType: TextInputType.number,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return "Please Provide Valid Pin Code";
@@ -289,6 +285,11 @@ class _BookTestPageState extends State<BookTestPage> {
                                   if (value['status']) {
                                     box.write(StorageConstant.lastOrderDate,
                                         DateFormat("dd-MM-yyyy").format(date));
+                                    if (value['next_date'] != null) {
+                                      box.write(StorageConstant.next_date,
+                                          value['next_date']);
+                                    }
+
                                     setState(() {});
                                     Get.defaultDialog(
                                       title: "Congratulation",

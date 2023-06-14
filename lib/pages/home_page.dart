@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:badges/badges.dart' as badges;
@@ -25,9 +26,15 @@ import 'package:susu/utils/bim.dart';
 import 'package:susu/utils/mycontant.dart';
 import 'package:susu/utils/storage_constant.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
+import 'package:syncfusion_flutter_core/theme.dart';
+
+///Slider import
+import 'package:syncfusion_flutter_sliders/sliders.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../notificationservice/local_notification_service.dart';
+import '../utils/util.dart';
 import 'account_page.dart';
 import 'contact_info_change_password.dart';
 
@@ -52,12 +59,48 @@ class _HomePageState extends State<HomePage> {
   var good = Colors.green;
   var overWeight = Colors.red;
   var obesity = Colors.brown;
+  double _sliderValue = 0;
   DateTime selectedDate = DateTime.now();
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+
+    FirebaseMessaging.instance.getInitialMessage().then(
+      (message) {
+        print("FirebaseMessaging.instance.getInitialMessage");
+        if (message != null) {
+          LocalNotificationService.createanddisplaynotification(message);
+          print("New Notification");
+        }
+      },
+    );
+
+    // 2. This method only call when App in forground it mean app must be opened
+    FirebaseMessaging.onMessage.listen(
+      (message) {
+        print("FirebaseMessaging.onMessage.listen");
+        if (message.notification != null) {
+          print(message.notification!.title);
+          print(message.notification!.body);
+          print("message.data11 ${message.data}");
+          LocalNotificationService.createanddisplaynotification(message);
+        }
+      },
+    );
+    // 3. This method only call when App in background and not terminated(not closed)
+    FirebaseMessaging.onMessageOpenedApp.listen(
+      (message) {
+        print("FirebaseMessaging.onMessageOpenedApp.listen");
+        if (message.notification != null) {
+          LocalNotificationService.createanddisplaynotification(message);
+          print(message.notification!.title);
+          print(message.notification!.body);
+          print("message.data22 ${message.data['_id']}");
+        }
+      },
+    );
 
     fetchLatestReport();
   }
@@ -73,7 +116,7 @@ class _HomePageState extends State<HomePage> {
       DateTime nextDate =
           DateFormat('yyyy-MM-dd').parse(box.read(StorageConstant.next_date));
       int days = nextDate.difference(currentDate).inDays;
-      return "Subscription Days Left : ${days == 0 ? "-" : days}";
+      return "Subscription Days Left : ${days}";
     }
     return "Subscription Days Left : Locked";
   }
@@ -99,6 +142,7 @@ class _HomePageState extends State<HomePage> {
         setState(() {
           reportFound = "";
           reportDate = value['date'];
+
           reportData.add(TableRow(
               decoration: const BoxDecoration(
                   border: Border(
@@ -122,7 +166,7 @@ class _HomePageState extends State<HomePage> {
               reportData.add(
                 TableRow(children: [
                   tableCell(e['name'], true, true),
-                  tableCell(e['alise'], true),
+                  tableCell(e['alias'], true),
                   tableCell(e['value'], true),
                 ]),
               );
@@ -130,6 +174,9 @@ class _HomePageState extends State<HomePage> {
           }
         });
       } else {
+        Map<String, dynamic> user = value['user'];
+        Util.storeValueOfUser(user);
+        // print("Next Date" + box.read(StorageConstant.next_date));
         setState(() {
           reportFound = "Recent test result not found";
         });
@@ -178,6 +225,7 @@ class _HomePageState extends State<HomePage> {
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
+        actions: [],
       ),
       drawer: Drawer(
         backgroundColor: myWhite,
@@ -246,14 +294,6 @@ class _HomePageState extends State<HomePage> {
               },
             ),
             CustomListMenuItem(
-              name: "Book A Test",
-              leadingIcon: Icons.bookmark_add,
-              iconColor: myPrimaryColor,
-              onTap: () {
-                goTO(const BookTestPage());
-              },
-            ),
-            CustomListMenuItem(
               name: "Change Password",
               leadingIcon: Icons.key,
               iconColor: myPrimaryColor,
@@ -277,8 +317,8 @@ class _HomePageState extends State<HomePage> {
       ),
       body: SingleChildScrollView(
         child: SizedBox(
-          width: Get.width,
-          height: Get.height,
+          width: Get.size.width,
+          height: Get.height - 100,
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Card(
@@ -365,14 +405,14 @@ class _HomePageState extends State<HomePage> {
                                           textAlign: TextAlign.start,
                                         ),
                                       ),
-                                      gapHeightM2,
+                                      gapHeightS,
                                       ElevatedButton(
                                           onPressed: () {
                                             Get.back();
                                             Get.to(BookTestPage());
                                           },
                                           child: Text("Book Now")),
-                                      gapHeightM2,
+                                      gapHeightS,
                                     ],
                                   ),
                                 ),
@@ -390,115 +430,127 @@ class _HomePageState extends State<HomePage> {
                           startColor: const Color(0xFFa0538b),
                           endColor: const Color(0xFF634d8d),
                           onTap: () {
-                            Get.dialog(Dialog(
-                              clipBehavior: Clip.hardEdge,
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12)),
-                              child: StatefulBuilder(
-                                builder: (context, setState) {
-                                  return Container(
-                                    width: 250,
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        SizedBox(
-                                          height: 150,
-                                          child: Stack(
-                                            children: [
-                                              Positioned(
-                                                  top: 50,
-                                                  child: Image.asset(
-                                                    "assets/images/calendar_group.png",
-                                                    fit: BoxFit.cover,
-                                                  )),
-                                              ClipPath(
-                                                clipper: LeftBottomClipper(),
-                                                child: Container(
-                                                  height: 150,
-                                                  color: myPrimaryColor,
+                            if (box.read(StorageConstant.userStatus) != null &&
+                                box.read(StorageConstant.userStatus)) {
+                              Get.dialog(Dialog(
+                                clipBehavior: Clip.hardEdge,
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12)),
+                                child: StatefulBuilder(
+                                  builder: (context, setState) {
+                                    return Container(
+                                      width: 250,
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          SizedBox(
+                                            height: 150,
+                                            child: Stack(
+                                              children: [
+                                                Positioned(
+                                                    top: 50,
+                                                    child: Image.asset(
+                                                      "assets/images/calendar_group.png",
+                                                      fit: BoxFit.cover,
+                                                    )),
+                                                ClipPath(
+                                                  clipper: LeftBottomClipper(),
+                                                  child: Container(
+                                                    height: 150,
+                                                    color: myPrimaryColor,
+                                                  ),
                                                 ),
-                                              ),
-                                              Positioned(
-                                                  top: 15,
-                                                  right: 15,
-                                                  child: Image.asset(
-                                                    "assets/images/calendar.png",
-                                                    width: 125,
-                                                  )),
-                                            ],
-                                          ),
-                                        ),
-                                        gapHeightM2,
-                                        Text("Please Select Date"),
-                                        gapHeightM2,
-                                        TextButton(
-                                          style: TextButton.styleFrom(
-                                              side: BorderSide(
-                                                  width: 1,
-                                                  color: Colors.black38)),
-                                          onPressed: () {
-                                            showMonthPicker(
-                                              context: context,
-                                              headerColor: myPrimaryColor,
-                                              initialDate: DateTime.now(),
-                                            ).then((date) {
-                                              if (date != null) {
-                                                setState(() {
-                                                  selectedDate = date;
-                                                });
-                                              }
-                                            });
-                                          },
-                                          child: Container(
-                                            child: Text(
-                                              DateFormat("MMM yyyy")
-                                                  .format(selectedDate),
-                                              style: TextStyle(fontSize: 25),
+                                                Positioned(
+                                                    top: 15,
+                                                    right: 15,
+                                                    child: Image.asset(
+                                                      "assets/images/calendar.png",
+                                                      width: 125,
+                                                    )),
+                                              ],
                                             ),
                                           ),
-                                        ),
-                                        gapHeightM2,
-                                        ElevatedButton(
+                                          gapHeightM2,
+                                          Text("Please Select Date"),
+                                          gapHeightM2,
+                                          TextButton(
+                                            style: TextButton.styleFrom(
+                                                side: BorderSide(
+                                                    width: 1,
+                                                    color: Colors.black38)),
                                             onPressed: () {
-                                              DashboardService
-                                                      .fetchReportDetailFullByMonth(
-                                                          DateFormat("MM-yyyy")
-                                                              .format(
-                                                                  selectedDate))
-                                                  .then((value) {
-                                                if (value != null) {
-                                                  Get.back();
-                                                  if (value.status!) {
-                                                    if (value.orderDetail!
-                                                            .status! ==
-                                                        "completed") {
+                                              showMonthPicker(
+                                                context: context,
+                                                headerColor: myPrimaryColor,
+                                                initialDate: DateTime.now(),
+                                              ).then((date) {
+                                                if (date != null) {
+                                                  setState(() {
+                                                    selectedDate = date;
+                                                  });
+                                                }
+                                              });
+                                            },
+                                            child: Container(
+                                              child: Text(
+                                                DateFormat("MMM yyyy")
+                                                    .format(selectedDate),
+                                                style: TextStyle(fontSize: 25),
+                                              ),
+                                            ),
+                                          ),
+                                          gapHeightM2,
+                                          ElevatedButton(
+                                              onPressed: () {
+                                                DashboardService
+                                                        .fetchReportDetailFullByMonth(
+                                                            DateFormat(
+                                                                    "MM-yyyy")
+                                                                .format(
+                                                                    selectedDate))
+                                                    .then((value) {
+                                                  if (value != null) {
+                                                    Get.back();
+                                                    if (value.status!) {
                                                       if (value.orderDetail!
-                                                              .locked ==
-                                                          "0") {
-                                                        Get.to(ReportDetailPage(
-                                                          reportId: value
-                                                              .orderDetail!.id!,
-                                                        ));
-                                                      } else if (int.parse(
-                                                              box.read(
-                                                                  StorageConstant
-                                                                      .point)) <
-                                                          30) {
-                                                        Get.to(InfoPage());
-                                                      } else {
-                                                        Get.to(ReportDetailPage(
-                                                          reportId: value
-                                                              .orderDetail!.id!,
-                                                        ));
+                                                              .status! ==
+                                                          "completed") {
+                                                        if (value.orderDetail!
+                                                                .locked ==
+                                                            "0") {
+                                                          Get.to(
+                                                              ReportDetailPage(
+                                                            reportId: value
+                                                                .orderDetail!
+                                                                .id!,
+                                                          ));
+                                                        } else if (int.parse(box
+                                                                .read(StorageConstant
+                                                                    .point)) <
+                                                            30) {
+                                                          Get.to(InfoPage());
+                                                        } else {
+                                                          Get.to(
+                                                              ReportDetailPage(
+                                                            reportId: value
+                                                                .orderDetail!
+                                                                .id!,
+                                                          ));
+                                                        }
+                                                      } else if (value
+                                                              .orderDetail!
+                                                              .status! !=
+                                                          "completed") {
+                                                        Get.defaultDialog(
+                                                            title: "Alert",
+                                                            middleText:
+                                                                "Your report is under process");
                                                       }
-                                                    } else if (value
-                                                            .orderDetail!
-                                                            .status! !=
-                                                        "completed") {
+                                                    } else {
                                                       Get.defaultDialog(
                                                           title: "Alert",
                                                           middleText:
-                                                              "You report is under process");
+                                                              "No Record Found");
                                                     }
                                                   } else {
                                                     Get.defaultDialog(
@@ -506,22 +558,25 @@ class _HomePageState extends State<HomePage> {
                                                         middleText:
                                                             "No Record Found");
                                                   }
-                                                } else {
-                                                  Get.defaultDialog(
-                                                      title: "Alert",
-                                                      middleText:
-                                                          "No Record Found");
-                                                }
-                                              });
-                                            },
-                                            child: const Text("Continue")),
-                                        gapHeightM2,
-                                      ],
-                                    ),
-                                  );
-                                },
-                              ),
-                            ));
+                                                });
+                                              },
+                                              child: const Text("Continue")),
+                                          gapHeightM2,
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ));
+                            } else {
+                              Get.defaultDialog(
+                                  title: "Alert",
+                                  middleText: """Your profile is locked for now.
+
+You have to Book Test first, then wait until your final lab results are evaluated. After this only, you would be able to unlock your report and access your personalized dashboard.
+
+Team Susu""");
+                            }
                           },
                         ),
                         circleButton(
@@ -775,9 +830,14 @@ class _HomePageState extends State<HomePage> {
                                       } else {
                                         Get.to(InfoPage());
                                       }
-                                    } else if (value.orderDetail!.status! !=
-                                        "completed") {
-                                      Get.to(InfoPage());
+                                    } else if (value.orderDetail!.status! ==
+                                            "pending" ||
+                                        value.orderDetail!.status! ==
+                                            "captured") {
+                                      Get.defaultDialog(
+                                          title: "Alert",
+                                          middleText:
+                                              "Your test is under process");
                                     }
                                   } else {
                                     Get.defaultDialog(
@@ -804,15 +864,23 @@ class _HomePageState extends State<HomePage> {
                         onPressed: () {
                           try {
                             Share.shareWithResult("Share Link").then((value) {
-                              DashboardService.saveUpdatePoints(10, true);
-                              box.write(
-                                  StorageConstant.point,
-                                  (int.parse(box.read(StorageConstant.point)) +
-                                          10)
-                                      .toString());
-                              setState(() {});
+                              print(
+                                  "Reffer:: status ${value.status} ShareResultStatus.success  ${value == ShareResultStatus.success} ShareResultStatus.dismissed ${value == ShareResultStatus.dismissed} ShareResultStatus.unavailable ${value == ShareResultStatus.unavailable} values ${ShareResultStatus.values.toString()}");
+                              if (value.status == ShareResultStatus.success) {
+                                DashboardService.saveUpdatePoints(10, true);
+
+                                box.write(
+                                    StorageConstant.point,
+                                    (int.parse(box
+                                                .read(StorageConstant.point)) +
+                                            10)
+                                        .toString());
+                                setState(() {});
+                              }
                             });
-                          } catch (e) {}
+                          } catch (e) {
+                            print("Reffer:: Catch $e");
+                          }
                         },
                         icon: const Icon(
                           FontAwesomeIcons.share,
@@ -854,10 +922,20 @@ class _HomePageState extends State<HomePage> {
                                     print("Else First");
                                     Get.to(InfoPage());
                                   }
+                                } else if (value.orderDetail!.status! ==
+                                        "pending" ||
+                                    value.orderDetail!.status! == "captured") {
+                                  print("Else First");
+                                  Get.defaultDialog(
+                                      title: "Alert",
+                                      middleText:
+                                          "Your report is under process");
                                 } else if (value.orderDetail!.status! !=
                                     "completed") {
-                                  print("Else First");
-                                  Get.to(InfoPage());
+                                  Get.defaultDialog(
+                                      title: "Alert",
+                                      middleText:
+                                          "Your report is under process");
                                 }
                               } else {
                                 Get.defaultDialog(
@@ -983,6 +1061,27 @@ class _HomePageState extends State<HomePage> {
     return BMI.getBmi(
         height: int.parse(box.read(StorageConstant.height)),
         weight: int.parse(box.read(StorageConstant.weight)));
+  }
+
+  SfSliderTheme _numerical() {
+    return SfSliderTheme(
+        data: SfSliderThemeData(
+            tooltipBackgroundColor: myPrimaryColor,
+            labelOffset: const Offset(-30, 0),
+            tickOffset: const Offset(-15, 0)),
+        child: SfSlider.vertical(
+          showLabels: true,
+          interval: 10,
+          min: 0.0,
+          max: 13.0,
+          showTicks: true,
+          isInversed: true,
+          tooltipPosition: SliderTooltipPosition.right,
+          value: _sliderValue,
+          onChanged: (dynamic values) {},
+          enableTooltip: true,
+          shouldAlwaysShowTooltip: false,
+        ));
   }
 
   SfRadialGauge _buildRadialTextPointer() {

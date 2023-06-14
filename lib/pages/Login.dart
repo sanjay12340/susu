@@ -4,6 +4,7 @@ import 'package:susu/lab_pages/lab_home_page.dart';
 import 'package:susu/pages/home_page.dart';
 
 import 'package:susu/pages/sign_up_final.dart';
+import 'package:susu/pages/verify_email_page.dart';
 import 'package:susu/services/dashboard_service.dart';
 import 'package:susu/services/game_result_service.dart';
 import 'package:susu/services/genral_api_call.dart';
@@ -167,7 +168,9 @@ class _LoginPageState extends State<LoginPage> {
                                     onPressed: () {
                                       if (_formKey.currentState!.validate()) {
                                         DashboardService.loginUser(
-                                                _username.text, _password.text)
+                                                _username.text,
+                                                _password.text,
+                                                deviceToken!)
                                             .then((value) {
                                           if (value == null ||
                                               !value['status']) {
@@ -210,7 +213,7 @@ class _LoginPageState extends State<LoginPage> {
                                             vertical: 10),
                                         shape: const StadiumBorder()),
                                     onPressed: () {
-                                      Get.to(SignUPFinalPage());
+                                      Get.to(VerifyEmailPage());
                                       // if (_formKey.currentState!.validate()) {
                                       //   // submit form data to backend
                                       // }

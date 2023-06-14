@@ -48,6 +48,7 @@ class _LabTestListState extends State<LabTestList> {
       limit: limit,
       offset: offset.value,
       status: widget.status,
+      labId: widget.labid,
       date: widget.date,
       upcomingTodayHistory: widget.upcomingTodayHistory,
     ).then((value) {

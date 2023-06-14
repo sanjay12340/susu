@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:intl/intl.dart';
 import 'package:susu/models/order_detail_full_modal.dart';
 import 'package:susu/pages/bmi_page.dart';
 import 'package:susu/pages/calorie_count_page.dart';
+import 'package:susu/pages/range_meter.dart';
 import 'package:susu/pages/report_detail_page.dart';
 import 'package:susu/pages/sleep_count_page.dart';
 import 'package:susu/pages/step_count_page.dart';
@@ -15,6 +17,7 @@ import 'package:susu/extentions/my_string.dart';
 import 'package:susu/utils/util.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 
+import '../models/water_taken_today_modal.dart';
 import '../utils/bim.dart';
 
 class DashboardPage extends StatefulWidget {
@@ -38,6 +41,9 @@ class _DashboardPageState extends State<DashboardPage> {
   var good = Colors.green;
   var overWeight = Colors.red;
   var obesity = Colors.brown;
+  var maxGlass = 2.obs;
+  var takenGlass = 0.obs;
+  var waterTaken = WaterTakenTodayModal().obs;
 
   @override
   void initState() {
@@ -45,6 +51,23 @@ class _DashboardPageState extends State<DashboardPage> {
     super.initState();
 
     fetchLatestReport();
+    fetchWaterIntakeToday();
+  }
+
+  void fetchWaterIntakeToday() {
+    DashboardService.fetchWaterTakenTodayReport(box.read(StorageConstant.id))
+        .then((value) {
+      if (value != null) {
+        waterTaken.value = value;
+        takenGlass.value = 0;
+        if (waterTaken.value.today != null) {
+          waterTaken.value.today!.forEach((element) {
+            takenGlass.value += int.parse(element.glass!);
+          });
+        }
+        maxGlass.value = value.goal != null ? int.parse(value.goal!) : 13;
+      }
+    });
   }
 
   void fetchLatestReport() {
@@ -79,11 +102,11 @@ class _DashboardPageState extends State<DashboardPage> {
                 e['name'] == "SG" ||
                 e['name'] == "BIL") {
               orderId = e['order_id'];
-              print("$e['name'] and alise $e['alise']");
+              print("$e['name'] and alias $e['alias']");
               reportData.add(
                 TableRow(children: [
                   tableCell(e['fname'], Colors.black87, true, true),
-                  tableCell(e['alise'], Colors.black87, true),
+                  tableCell(e['alias'], Colors.black87, true),
                   tableCell(
                       e['value'],
                       (e["p_condition"] ?? "").toLowerCase() == "normal"
@@ -321,32 +344,159 @@ class _DashboardPageState extends State<DashboardPage> {
               ),
               gapHeightM2,
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  taskCard("Water intake", "water.png",
-                      "${box.read(StorageConstant.gender) == "male" ? 3.5 : 3} Liter",
-                      () {
-                    Get.to(WaterPage());
-                  }),
-                  taskCard("Sleep", "sleep.png", "${Util.sleepByAge()} Hours",
-                      () {
-                    Get.to(SleepCountPage());
-                  }),
-                ],
-              ),
-              gapHeightM2,
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  taskCard("Step", "footstep.png",
-                      "${box.read(StorageConstant.gender) == "female" ? 8000 : 10000} Steps",
-                      () {
-                    Get.to(StepCountPage());
-                  }),
-                  taskCard("kcal Intake", "calories.png",
-                      "${Util.myBMR().toStringAsFixed(0)} cal", () {
-                    Get.to(CalorieCountPage());
-                  }),
+                  Container(
+                    width: Get.width * 0.45,
+                    height: 320,
+                    decoration: BoxDecoration(
+                        color: myWhite,
+                        borderRadius: BorderRadius.circular(12)),
+                    child: Stack(
+                      children: [
+                        Positioned(
+                          top: 5,
+                          left: 10,
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Obx(
+                                () => Container(
+                                  child: RangeMeter(
+                                    minValue: 0,
+                                    maxValue: maxGlass.value,
+                                    value: takenGlass.value > maxGlass.value
+                                        ? maxGlass.value
+                                        : takenGlass.value,
+                                  ),
+                                ),
+                              ),
+                              gapWidthM2,
+                              SizedBox(
+                                height: 300,
+                                child: Obx(
+                                  () => GestureDetector(
+                                    onTap: () {
+                                      Get.to(WaterPage());
+                                    },
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        SizedBox(
+                                          width: Get.width * 0.45,
+                                        ),
+                                        Text(
+                                          "Water Intake",
+                                          style: TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.w600,
+                                              color: Colors.black87),
+                                        ),
+                                        Text(
+                                          "${(maxGlass.value * 250 / 1000).toStringAsFixed(1)} Liters",
+                                          style: TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.w600,
+                                              color: Colors.green),
+                                        ),
+                                        Text(
+                                          "Real Time Update",
+                                          style: TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                        gapHeightS,
+                                        if (waterTaken != null &&
+                                            waterTaken.value.today != null)
+                                          Expanded(
+                                              child: SingleChildScrollView(
+                                                  child: Column(
+                                            children: [
+                                              ...waterTaken.value.today!
+                                                  .map((e) {
+                                                return Row(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Padding(
+                                                      padding: const EdgeInsets
+                                                              .symmetric(
+                                                          horizontal: 6,
+                                                          vertical: 3),
+                                                      child: CircleAvatar(
+                                                        radius: 4,
+                                                        backgroundColor:
+                                                            myPrimaryColorLight,
+                                                      ),
+                                                    ),
+                                                    Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      children: [
+                                                        Text(
+                                                          "${DateFormat("hh:mm aa").format(e.createdAt!)}",
+                                                          style: TextStyle(
+                                                              fontSize: 12,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold),
+                                                        ),
+                                                        Text(
+                                                          "+ ${e.glass!} Glass",
+                                                          style: TextStyle(
+                                                              fontSize: 12,
+                                                              color:
+                                                                  myPrimaryColor,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold),
+                                                        ),
+                                                        gapHeightM1
+                                                      ],
+                                                    ),
+                                                  ],
+                                                );
+                                              }).toList(),
+                                            ],
+                                          )))
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  gapWidthM2,
+                  SizedBox(
+                    width: Get.width * 0.4,
+                    child: Column(
+                      children: [
+                        taskCard(
+                            "Sleep", "sleep.png", "${Util.sleepByAge()} Hours",
+                            () {
+                          Get.to(SleepCountPage());
+                        }),
+                        gapHeightM2,
+                        taskCard("Step", "footstep.png",
+                            "${box.read(StorageConstant.gender) == "female" ? 8000 : 10000} Steps",
+                            () {
+                          Get.to(StepCountPage());
+                        }),
+                        gapHeightM2,
+                        taskCard("kcal Intake", "calories.png",
+                            "${Util.myBMR().toStringAsFixed(0)} cal", () {
+                          Get.to(CalorieCountPage());
+                        }),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ],

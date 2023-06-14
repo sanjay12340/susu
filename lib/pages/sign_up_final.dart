@@ -24,7 +24,8 @@ import 'home_page.dart';
 import 'package:intl/intl.dart';
 
 class SignUPFinalPage extends StatefulWidget {
-  SignUPFinalPage({Key? key}) : super(key: key);
+  final String email;
+  SignUPFinalPage({Key? key, required this.email}) : super(key: key);
 
   @override
   _SignUPFinalPageState createState() => _SignUPFinalPageState();
@@ -147,6 +148,7 @@ class _SignUPFinalPageState extends State<SignUPFinalPage> {
         setState(() {});
       });
     });
+    _emailController.text = widget.email;
     getToken();
   }
 
@@ -200,6 +202,7 @@ class _SignUPFinalPageState extends State<SignUPFinalPage> {
                   child: Column(
                     children: [
                       Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           TextFormFieldWithSizeBox(
                             focusNode: _focusNodes[0],
@@ -361,6 +364,7 @@ class _SignUPFinalPageState extends State<SignUPFinalPage> {
                           ),
                           TextFormFieldWithSizeBox(
                             focusNode: _focusNodes[5],
+                            readOnly: true,
                             fullNameController: _emailController,
                             label: "Email",
                             validator: (value) {
@@ -581,6 +585,7 @@ class TextFormFieldWithSizeBox extends StatelessWidget {
     this.inputFormatters,
     this.iconData,
     this.obscureText,
+    this.readOnly = false,
   }) : _fullNameController = fullNameController;
 
   final TextEditingController _fullNameController;
@@ -590,11 +595,13 @@ class TextFormFieldWithSizeBox extends StatelessWidget {
   final List<TextInputFormatter>? inputFormatters;
   final IconData? iconData;
   final bool? obscureText;
+  final bool readOnly;
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         TextFormField(
+          readOnly: readOnly,
           focusNode: focusNode,
           obscureText: obscureText ?? false,
           inputFormatters: inputFormatters,

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:susu/utils/mycontant.dart';
-import 'package:youtube_player_iframe/youtube_player_iframe.dart';
 import 'package:get/get.dart';
 
 import '../mywidgets/step_card.dart';
@@ -22,8 +21,7 @@ class StepCalorieSwimmingPage extends StatefulWidget {
 }
 
 class _StepCalorieSwimmingPageState extends State<StepCalorieSwimmingPage> {
-  final _controller = YoutubePlayerController.fromVideoId(
-      videoId: "fhyMaNuMVQM", params: YoutubePlayerParams());
+
   String walkingType = "Backstroke";
   var speedController = TextEditingController(text: "3.5");
   var timeController = TextEditingController();
