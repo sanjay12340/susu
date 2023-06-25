@@ -129,7 +129,7 @@ class _StepCountPageState extends State<StepCountPage> {
   @override
   Widget build(BuildContext context) {
 
-    print("Chart Max:: ${(chartData.sorted((a, b) => (a.value ?? 0) - (b.value ?? 0)).last.value ?? 0) + 1000}");
+    // print("Chart Max:: ${(chartData.sorted((a, b) => (a.value ?? 0) - (b.value ?? 0)).last.value ?? 0) + 1000}");
 
     return WillPopScope(
       onWillPop: () async {
@@ -447,7 +447,7 @@ class _StepCountPageState extends State<StepCountPage> {
                           height: 300,
                           child: BarChart(
                             BarChartData(
-                              maxY: (chartData.sorted((a, b) => (a.value ?? 0) - (b.value ?? 0)).last.value ?? 0) + 1000,
+                              maxY: 5000,
                               barTouchData: BarTouchData(
                                 enabled: false,
                                 touchTooltipData: BarTouchTooltipData(
