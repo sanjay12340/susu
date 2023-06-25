@@ -447,7 +447,7 @@ class _StepCountPageState extends State<StepCountPage> {
                           height: 300,
                           child: BarChart(
                             BarChartData(
-                              maxY: 5000,
+                              maxY: 10000,
                               barTouchData: BarTouchData(
                                 enabled: false,
                                 touchTooltipData: BarTouchTooltipData(
