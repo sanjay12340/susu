@@ -536,7 +536,7 @@ class DashboardService {
 //step Track
   static Future<StepHistoryDetailModal?> fetchStepTrack(
       {required String userId, required int limit}) async {
-    print("$main_url$token&fetch_step_track=yes&user_id=$userId");
+    print("$main_url$token&fetch_step_track=yes&user_id=$userId&limit=$limit&offset=0");
     try {
       var url = Uri.parse(
           "$main_url$token&fetch_step_track=yes&user_id=$userId&limit=$limit&offset=0");

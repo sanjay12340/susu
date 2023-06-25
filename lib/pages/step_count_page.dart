@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -11,7 +12,8 @@ import 'package:susu/services/dashboard_service.dart';
 import 'package:susu/utils/mycontant.dart';
 import 'package:susu/utils/storage_constant.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
-import 'package:charts_flutter_new/flutter.dart' as charts;
+import 'package:collection/collection.dart';
+// import 'package:charts_flutter_new/flutter.dart' as charts;
 
 import 'step_calorie_page.dart';
 import 'package:intl/intl.dart';
@@ -29,15 +31,13 @@ class _StepCountPageState extends State<StepCountPage> {
   TextEditingController _walkingController = TextEditingController();
   TextEditingController _RunningController = TextEditingController();
   var chartData = List<BarModel>.empty(growable: true);
-  List<charts.Series<BarModel, String>> createSampleModel() {
-    var data = chartData;
+
+  List<BarModel> createSampleModel() {
     return [
-      charts.Series(
-        id: "steps",
-        data: data,
-        domainFn: (BarModel barModel, _) => barModel.name!,
-        measureFn: (BarModel barModel, _) => barModel.value,
-      )
+      BarModel(name: "Sample 2", value: 3),
+      BarModel(name: "Sample 3", value: 4),
+      BarModel(name: "Sample 4", value: 5),
+      BarModel(name: "Sample 5", value: 6),
     ];
   }
 
@@ -56,6 +56,7 @@ class _StepCountPageState extends State<StepCountPage> {
     child: Image.asset("assets/images/footstep.png"),
   );
   var box = GetStorage();
+
   @override
   void initState() {
     super.initState();
@@ -127,6 +128,9 @@ class _StepCountPageState extends State<StepCountPage> {
 
   @override
   Widget build(BuildContext context) {
+
+    print("Chart Max:: ${(chartData.sorted((a, b) => (a.value ?? 0) - (b.value ?? 0)).last.value ?? 0) + 1000}");
+
     return WillPopScope(
       onWillPop: () async {
         // Hide the keyboard
@@ -439,12 +443,74 @@ class _StepCountPageState extends State<StepCountPage> {
                               fontSize: 18, fontWeight: FontWeight.bold),
                         ),
                         Container(
-                            width: Get.width - 10,
-                            height: 300,
-                            child: charts.BarChart(
-                              createSampleModel(),
-                              animate: true,
-                            )),
+                          width: Get.width - 10,
+                          height: 300,
+                          child: BarChart(
+                            BarChartData(
+                              maxY: (chartData.sorted((a, b) => (a.value ?? 0) - (b.value ?? 0)).last.value ?? 0) + 1000,
+                              barTouchData: BarTouchData(
+                                enabled: false,
+                                touchTooltipData: BarTouchTooltipData(
+                                  tooltipBgColor: Colors.transparent,
+                                  tooltipPadding: EdgeInsets.zero,
+                                  tooltipMargin: 8,
+                                  getTooltipItem: (
+                                    BarChartGroupData group,
+                                    int groupIndex,
+                                    BarChartRodData rod,
+                                    int rodIndex,
+                                  ) {
+                                    return BarTooltipItem(
+                                      rod.toY.round().toString(),
+                                      const TextStyle(
+                                        color: Colors.cyan,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                              borderData: FlBorderData(show: false),
+                              gridData: const FlGridData(show: false),
+                              barGroups: chartData
+                                  .mapIndexed((i, e) => BarChartGroupData(
+                                          x: i,
+                                          barRods: [
+                                            BarChartRodData(
+                                                toY: e.value?.toDouble() ?? 0.0)
+                                          ],
+                                          showingTooltipIndicators: [
+                                            0
+                                          ]))
+                                  .toList(),
+                              titlesData: FlTitlesData(
+                                show: true,
+                                bottomTitles: AxisTitles(
+                                  sideTitles: SideTitles(
+                                    showTitles: true,
+                                    reservedSize: 30,
+                                    getTitlesWidget: (value, meta) {
+                                      var model = chartData[value.toInt()];
+                                      return SideTitleWidget(
+                                          axisSide: meta.axisSide,
+                                          child: Text(model.name ?? ""));
+                                    },
+                                  ),
+                                ),
+                                leftTitles: const AxisTitles(
+                                  sideTitles: SideTitles(showTitles: false),
+                                ),
+                                topTitles: const AxisTitles(
+                                  sideTitles: SideTitles(showTitles: false),
+                                ),
+                                rightTitles: const AxisTitles(
+                                  sideTitles: SideTitles(showTitles: false),
+                                ),
+                              ),
+                            ),
+                          ),
+                          // child: SfCartesianChart(),
+                        ),
                       ],
                     ),
                   ),
@@ -536,5 +602,6 @@ class _StepCountPageState extends State<StepCountPage> {
 class BarModel {
   String? name;
   int? value;
+
   BarModel({required this.name, required this.value});
 }

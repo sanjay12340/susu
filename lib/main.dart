@@ -26,6 +26,8 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   LocalNotificationService.initialize();
+  // final fcmToken = await FirebaseMessaging.instance.getToken();
+  // print("FCM Token:: $fcmToken");
 
   await GetStorage.init();
   final box = GetStorage();

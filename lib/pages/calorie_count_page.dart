@@ -10,7 +10,7 @@ import 'package:susu/services/dashboard_service.dart';
 import 'package:susu/utils/mycontant.dart';
 import 'package:susu/utils/storage_constant.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
-import 'package:charts_flutter_new/flutter.dart' as charts;
+// import 'package:charts_flutter_new/flutter.dart' as charts;
 import 'package:intl/intl.dart' show DateFormat;
 
 import '../utils/util.dart';
@@ -41,16 +41,18 @@ class _CalorieCountPageState extends State<CalorieCountPage> {
   final _weightController = TextEditingController();
   final _heightController = TextEditingController();
   final _ageController = TextEditingController();
-  List<charts.Series<BarModel, String>> createSampleModel() {
-    return [
-      charts.Series(
-        id: "Calorie",
-        data: chartData,
-        domainFn: (BarModel barModel, _) => barModel.name!,
-        measureFn: (BarModel barModel, _) => barModel.value,
-      )
-    ];
-  }
+
+
+  // List<charts.Series<BarModel, String>> createSampleModel() {
+  //   return [
+  //     charts.Series(
+  //       id: "Calorie",
+  //       data: chartData,
+  //       domainFn: (BarModel barModel, _) => barModel.name!,
+  //       measureFn: (BarModel barModel, _) => barModel.value,
+  //     )
+  //   ];
+  // }
 
   @override
   void initState() {

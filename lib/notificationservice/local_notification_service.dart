@@ -1,5 +1,6 @@
+
+
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class LocalNotificationService {
@@ -7,28 +8,31 @@ class LocalNotificationService {
       FlutterLocalNotificationsPlugin();
 
   static void initialize() {
-    // initializationSettings  for Android
     const InitializationSettings initializationSettings =
         InitializationSettings(
       android: AndroidInitializationSettings("@mipmap/ic_launcher"),
+          iOS: DarwinInitializationSettings(),
     );
+
+    FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(alert: true, badge: true, sound: true);
 
     _notificationsPlugin.initialize(
       initializationSettings,
-      onSelectNotification: (String? id) async {
-        print("onSelectNotification");
-        if (id!.isNotEmpty) {
-          print("Router Value1234 $id");
 
-          // Navigator.of(context).push(
-          //   MaterialPageRoute(
-          //     builder: (context) => DemoScreen(
-          //       id: id,
-          //     ),
-          //   ),
-          // );
-        }
-      },
+      // onSelectNotification: (String? id) async {
+      //   print("onSelectNotification");
+      //   if (id!.isNotEmpty) {
+      //     print("Router Value1234 $id");
+      //
+      //     // Navigator.of(context).push(
+      //     //   MaterialPageRoute(
+      //     //     builder: (context) => DemoScreen(
+      //     //       id: id,
+      //     //     ),
+      //     //   ),
+      //     // );
+      //   }
+      // },
     );
   }
 

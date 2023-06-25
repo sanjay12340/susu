@@ -9,7 +9,7 @@ import 'package:susu/services/dashboard_service.dart';
 import 'package:susu/utils/mycontant.dart';
 import 'package:susu/utils/storage_constant.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
-import 'package:charts_flutter_new/flutter.dart' as charts;
+// import 'package:charts_flutter_new/flutter.dart' as charts;
 import 'package:intl/intl.dart';
 
 import '../models/sleep_history_detail_modal.dart';
@@ -38,17 +38,17 @@ class _SleepCountPageState extends State<SleepCountPage> {
   TimeOfDay sleepTime = TimeOfDay(hour: 22, minute: 0);
   TimeOfDay wakeUpTime = TimeOfDay(hour: 6, minute: 0);
   var box = GetStorage();
-  var chartData = <BarModel>[];
-  List<charts.Series<BarModel, String>> createSampleModel() {
-    return [
-      charts.Series(
-        id: "steps",
-        data: chartData,
-        domainFn: (BarModel barModel, _) => barModel.name!,
-        measureFn: (BarModel barModel, _) => barModel.value,
-      )
-    ];
-  }
+  // var chartData = <BarModel>[];
+  // List<charts.Series<BarModel, String>> createSampleModel() {
+  //   return [
+  //     charts.Series(
+  //       id: "steps",
+  //       data: chartData,
+  //       domainFn: (BarModel barModel, _) => barModel.name!,
+  //       measureFn: (BarModel barModel, _) => barModel.value,
+  //     )
+  //   ];
+  // }
 
   @override
   void initState() {
@@ -100,9 +100,9 @@ class _SleepCountPageState extends State<SleepCountPage> {
               }
 
               int v = t != null ? int.parse(t.duration ?? "0") : 0;
-              chartData.add(BarModel(name: dateFinal.format(date), value: v));
+              // chartData.add(BarModel(name: dateFinal.format(date), value: v));
             }
-            chartData = chartData.reversed.toList();
+            // chartData = chartData.reversed.toList();
           }
         });
       }
